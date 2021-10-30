@@ -1,10 +1,10 @@
 # Backend
-## Requirements:
+## Requirements
 1. Java 11
 2. Tomcat 9
 3. PostgreSQL 13
 
-## Dev database setup:
+## Dev database setup
 ```sql
 create database cloud_computing_dev;
 create user cloud_computing_dev with password 'cloud_computing_dev';
