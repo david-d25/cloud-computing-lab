@@ -1,10 +1,14 @@
 package space.davids_digital.cloud_computing_lab.backend
 
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.jdbc.datasource.DriverManagerDataSource
 import org.springframework.orm.hibernate5.HibernateTransactionManager
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.EnableTransactionManagement
 import java.util.*
@@ -12,15 +16,27 @@ import javax.sql.DataSource
 
 
 @Configuration
+@ComponentScan(basePackages = ["space.davids_digital.cloud_computing_lab"])
+@EnableJpaRepositories
 @EnableTransactionManagement
 open class AppConfig {
     @Bean
     open fun sessionFactory(): LocalSessionFactoryBean {
         val sessionFactory = LocalSessionFactoryBean()
         sessionFactory.setDataSource(dataSource())
-        sessionFactory.setPackagesToScan("space.davids_digital.cloud_computing_lab.backend")
+        sessionFactory.setPackagesToScan("space.davids_digital.cloud_computing_lab")
         sessionFactory.hibernateProperties = hibernateProperties()
         return sessionFactory
+    }
+
+    @Bean
+    open fun entityManagerFactory(): LocalContainerEntityManagerFactoryBean {
+        return LocalContainerEntityManagerFactoryBean().also {
+            it.setPackagesToScan("space.davids_digital.cloud_computing_lab")
+            it.dataSource = dataSource()
+            it.setJpaProperties(hibernateProperties())
+            it.jpaVendorAdapter = HibernateJpaVendorAdapter()
+        }
     }
 
     @Bean
@@ -47,7 +63,7 @@ open class AppConfig {
     @Bean
     open fun hibernateProperties(): Properties {
         val properties = Properties()
-        properties["hibernate.hbm2ddl.auto"] = "create"
+        properties["hibernate.hbm2ddl.auto"] = "update"
         properties["hibernate.dialect"] = "org.hibernate.dialect.PostgreSQLDialect"
         return properties
     }

@@ -19,4 +19,6 @@ DB_PASSWORD=cloud_computing_dev
 ```
 
 # Frontend
-*tumbleweed sound*
+## Requirements
+1. NPM 6.*
+2. NodeJS 12.*

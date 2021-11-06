@@ -1,0 +1,19 @@
+{
+  "name": "cloud_computing_lab_frontend",
+  "version": "1.0.0",
+  "description": "Cloud Computing Frontend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/david-d25/cloud-computing-lab.git"
+  },
+  "author": "david <david-d25@yandex.ru>, ilya <barsukoff.ilja@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/david-d25/cloud-computing-lab/issues"
+  },
+  "homepage": "https://github.com/david-d25/cloud-computing-lab#readme"
+}

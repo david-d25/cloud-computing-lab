@@ -1,0 +1,14 @@
+<project>
+    <parent>
+        <groupId>space.davids_digital.cloud_computing</groupId>
+        <artifactId>cloud-computing-lab</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>cloud-computing-lab-agents</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <modelVersion>4.0.0</modelVersion>
+
+    <build>
+        <sourceDirectory>src/main/kotlin</sourceDirectory>
+    </build>
+</project>
