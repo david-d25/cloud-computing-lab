@@ -1,44 +1,44 @@
 package space.davids_digital.cloud_computing_lab.backend.orm.entity.mapping
 
-import space.davids_digital.cloud_computing_lab.backend.model.Agent
-import space.davids_digital.cloud_computing_lab.backend.model.AgentStatus
+import space.davids_digital.cloud_computing_lab.backend.model.AgentModel
+import space.davids_digital.cloud_computing_lab.backend.model.AgentStatusModel
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.AgentEntity
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.enum.AgentStatusEntityEnum
 import java.sql.Timestamp
 
-fun AgentEntity.toModel() = Agent(
+fun AgentEntity.toModel() = AgentModel(
     id = id!!,
     type = type!!,
     name = name!!,
     status = when(status) {
-        AgentStatusEntityEnum.UNINITIALIZED -> AgentStatus.UNINITIALIZED
-        AgentStatusEntityEnum.RUNNING -> AgentStatus.RUNNING
-        AgentStatusEntityEnum.SLEEPING -> AgentStatus.SLEEPING
-        AgentStatusEntityEnum.ERROR -> AgentStatus.ERROR
+        AgentStatusEntityEnum.UNINITIALIZED -> AgentStatusModel.UNINITIALIZED
+        AgentStatusEntityEnum.RUNNING -> AgentStatusModel.RUNNING
+        AgentStatusEntityEnum.SLEEPING -> AgentStatusModel.SLEEPING
+        AgentStatusEntityEnum.ERROR -> AgentStatusModel.ERROR
         else -> throw IllegalStateException("Wrong 'status' field in AgentEntity")
     },
     updatePeriodSeconds = updatePeriodSeconds,
     visible = visible!!,
     lastUpdateTimestamp = lastUpdateTimestamp!!.toInstant(),
     sensitive = sensitive!!,
-    properties = properties,
+    parameters = parameters.entries.associate { entry -> Pair(entry.key, String(entry.value)) },
     memory = memory
 )
 
-fun Agent.toEntity() = AgentEntity(
+fun AgentModel.toEntity() = AgentEntity(
     id = id,
     type = type,
     name = name,
     status = when(status) {
-        AgentStatus.UNINITIALIZED -> AgentStatusEntityEnum.UNINITIALIZED
-        AgentStatus.RUNNING -> AgentStatusEntityEnum.RUNNING
-        AgentStatus.SLEEPING -> AgentStatusEntityEnum.SLEEPING
-        AgentStatus.ERROR -> AgentStatusEntityEnum.ERROR
+        AgentStatusModel.UNINITIALIZED -> AgentStatusEntityEnum.UNINITIALIZED
+        AgentStatusModel.RUNNING -> AgentStatusEntityEnum.RUNNING
+        AgentStatusModel.SLEEPING -> AgentStatusEntityEnum.SLEEPING
+        AgentStatusModel.ERROR -> AgentStatusEntityEnum.ERROR
     },
     updatePeriodSeconds = updatePeriodSeconds,
     visible = visible,
-    lastUpdateTimestamp = Timestamp.from(lastUpdateTimestamp),
+    lastUpdateTimestamp = if (lastUpdateTimestamp != null) Timestamp.from(lastUpdateTimestamp) else null,
     sensitive = sensitive,
-    properties = properties,
-    memory = memory
+    parameters = parameters.entries.associate { entry -> Pair(entry.key, entry.value.toByteArray()) },
+    memory = memory.toMutableMap()
 )

@@ -1,9 +1,16 @@
 package space.davids_digital.cloud_computing_lab.backend
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.reflections.Reflections
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Import
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
+import org.springframework.http.converter.HttpMessageConverter
+import org.springframework.http.converter.StringHttpMessageConverter
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.jdbc.datasource.DriverManagerDataSource
 import org.springframework.orm.hibernate5.HibernateTransactionManager
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean
@@ -11,28 +18,31 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.EnableTransactionManagement
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport
+import space.davids_digital.cloud_computing_lab.agent.AgentExecutor
 import java.util.*
 import javax.sql.DataSource
 
 
+@Import(WebMvcConfig::class)
 @Configuration
-@ComponentScan(basePackages = ["space.davids_digital.cloud_computing_lab"])
+@ComponentScan
 @EnableJpaRepositories
 @EnableTransactionManagement
-open class AppConfig {
+class AppConfig {
     @Bean
-    open fun sessionFactory(): LocalSessionFactoryBean {
+    fun sessionFactory(): LocalSessionFactoryBean {
         val sessionFactory = LocalSessionFactoryBean()
         sessionFactory.setDataSource(dataSource())
-        sessionFactory.setPackagesToScan("space.davids_digital.cloud_computing_lab")
+        sessionFactory.setPackagesToScan("space.davids_digital")
         sessionFactory.hibernateProperties = hibernateProperties()
         return sessionFactory
     }
 
     @Bean
-    open fun entityManagerFactory(): LocalContainerEntityManagerFactoryBean {
+    fun entityManagerFactory(): LocalContainerEntityManagerFactoryBean {
         return LocalContainerEntityManagerFactoryBean().also {
-            it.setPackagesToScan("space.davids_digital.cloud_computing_lab")
+            it.setPackagesToScan("space.davids_digital")
             it.dataSource = dataSource()
             it.setJpaProperties(hibernateProperties())
             it.jpaVendorAdapter = HibernateJpaVendorAdapter()
@@ -40,7 +50,7 @@ open class AppConfig {
     }
 
     @Bean
-    open fun dataSource(): DataSource {
+    fun dataSource(): DataSource {
         val requireEnv = { name: String ->
             System.getenv(name) ?: throw IllegalStateException("Please, provide the '$name' environment variable")
         }
@@ -50,21 +60,40 @@ open class AppConfig {
         ds.url = requireEnv("DB_URL")
         ds.username = requireEnv("DB_USERNAME")
         ds.password = requireEnv("DB_PASSWORD")
+        ds.connection.autoCommit = true
         return ds
     }
 
     @Bean
-    open fun transactionManager(): PlatformTransactionManager {
+    fun transactionManager(): PlatformTransactionManager {
         val transactionManager = HibernateTransactionManager()
         transactionManager.sessionFactory = sessionFactory().getObject()
+        transactionManager.dataSource = dataSource()
         return transactionManager
     }
 
     @Bean
-    open fun hibernateProperties(): Properties {
+    fun hibernateProperties(): Properties {
         val properties = Properties()
         properties["hibernate.hbm2ddl.auto"] = "update"
+        properties["hibernate.jdbc.batch_size"] = "500"
         properties["hibernate.dialect"] = "org.hibernate.dialect.PostgreSQLDialect"
+        properties["hibernate.show_sql"] = "true"
         return properties
+    }
+
+    @Bean
+    fun executorsTypeToName(): Map<String, String> {
+        val reflections = Reflections("space.davids_digital")
+        return reflections.getTypesAnnotatedWith(AgentExecutor::class.java).associate {
+            c -> Pair(c.name, c.getAnnotation(AgentExecutor::class.java).value)
+        }
+    }
+
+    @Bean
+    fun objectMapper(): ObjectMapper {
+        val mapper = ObjectMapper()
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        return mapper
     }
 }

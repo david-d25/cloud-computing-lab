@@ -1,9 +1,9 @@
 package space.davids_digital.cloud_computing_lab.backend.api.rest.dto.mapping
 
 import space.davids_digital.cloud_computing_lab.backend.api.rest.dto.StyleDto
-import space.davids_digital.cloud_computing_lab.backend.model.Agent
+import space.davids_digital.cloud_computing_lab.backend.model.AgentModel
 
-fun Agent.toStyleDto() = StyleDto(
+fun AgentModel.toStyleDto() = StyleDto(
     id = id,
     name = name,
     sensitive = sensitive
