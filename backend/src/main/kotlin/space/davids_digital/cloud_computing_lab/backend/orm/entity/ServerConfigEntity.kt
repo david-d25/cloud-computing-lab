@@ -10,6 +10,6 @@ data class ServerConfigEntity(
     @Column(name = "name")
     val name: String? = null,
 
-    @Column(name = "value", nullable = false)
+    @Column(name = "value", nullable = false, columnDefinition = "text")
     val value: String? = null
 )

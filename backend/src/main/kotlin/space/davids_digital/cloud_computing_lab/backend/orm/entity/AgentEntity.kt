@@ -38,7 +38,7 @@ data class AgentEntity (
         JoinColumn(name = "agent_id", referencedColumnName = "id")
     ])
     @MapKeyColumn(name = "key")
-    @Column(name = "value", length = 1000)
+    @Column(name = "value", columnDefinition = "text")
     var parameters: Map<String, String> = mapOf(),
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -46,7 +46,7 @@ data class AgentEntity (
         JoinColumn(name = "agent_id", referencedColumnName = "id")
     ])
     @MapKeyColumn(name = "key")
-    @Column(name = "value", length = 1000)
+    @Column(name = "value", columnDefinition = "text")
     var memory: MutableMap<String, String> = mutableMapOf(),
 
     @ElementCollection
