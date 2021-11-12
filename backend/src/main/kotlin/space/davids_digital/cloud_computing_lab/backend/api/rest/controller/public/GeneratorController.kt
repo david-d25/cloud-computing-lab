@@ -2,6 +2,7 @@ package space.davids_digital.cloud_computing_lab.backend.api.rest.controller.pub
 
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
 import space.davids_digital.cloud_computing_lab.backend.service.GeneratorService
 

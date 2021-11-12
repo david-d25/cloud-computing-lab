@@ -43,7 +43,8 @@ class AgentService @Autowired constructor(
                 sensitive = request.sensitive,
                 visible = request.visible,
                 updatePeriodSeconds = request.updatePeriodSeconds,
-                parameters = request.parameters
+                parameters = request.parameters,
+                status = AgentStatusEntityEnum.UNINITIALIZED
             )
         )
     }

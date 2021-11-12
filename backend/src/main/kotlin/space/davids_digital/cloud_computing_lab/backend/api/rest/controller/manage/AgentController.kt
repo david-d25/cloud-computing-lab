@@ -20,7 +20,7 @@ class AgentController @Autowired constructor(
     fun getAgents(): List<AgentResponseManageDto> = agentService.getAgents().map { it.toResponseManageDto() }
 
     @PutMapping
-    fun createAgent(@RequestBody request: CreateAgentRequestManageDto) {
+    fun createAgent(@RequestBody @Validated request: CreateAgentRequestManageDto) {
         agentService.createAgent(request.toModel())
     }
 

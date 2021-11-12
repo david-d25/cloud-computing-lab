@@ -96,5 +96,13 @@
             <groupId>space.davids_digital.cloud_computing</groupId>
             <artifactId>cloud-computing-lab-agents</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </dependency>
     </dependencies>
 </project>
