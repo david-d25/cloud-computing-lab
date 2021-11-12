@@ -29,7 +29,7 @@ class LocalClasspathAgentExecutionService @Autowired constructor(
         var entity = agentRepository.findById(id).orElseThrow { ServiceException("Agent id $id not found") }
         try {
             val executorClass: Class<*> = Class.forName(entity.type)
-            if (executorClass is AbstractAgentExecutor) {
+            if (AbstractAgentExecutor::class.java.isAssignableFrom(executorClass)) {
                 val context = EntityBasedAgentContext(entity)
                 val constructor = executorClass.getConstructor(AgentContext::class.java)
                 val executor = constructor.newInstance(context) as AbstractAgentExecutor
