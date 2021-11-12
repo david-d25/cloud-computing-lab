@@ -1,7 +1,5 @@
 package space.davids_digital.cloud_computing_lab.backend.orm.entity
 
-import com.sun.istack.NotNull
-import org.hibernate.type.BlobType
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.enum.AgentStatusEntityEnum
 import java.sql.Timestamp
 import javax.persistence.*
@@ -11,56 +9,51 @@ data class AgentEntity (
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "id")
-    val id: Int? = null,
+    var id: Int? = null,
 
-    @NotNull
-    @Column(name = "type")
-    val type: String? = null,
+    @Column(name = "type", nullable = false)
+    var type: String? = null,
 
-    @NotNull
-    @Column(name = "name")
-    val name: String? = null,
+    @Column(name = "name", nullable = false)
+    var name: String? = null,
 
-    @NotNull
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     var status: AgentStatusEntityEnum? = null,
 
-    @NotNull
-    @Column(name = "visible")
-    val visible: Boolean? = null,
+    @Column(name = "visible", nullable = false)
+    var visible: Boolean? = null,
 
     @Column(name = "update_period_seconds")
-    val updatePeriodSeconds: Long? = null,
+    var updatePeriodSeconds: Long? = null,
 
     @Column(name = "last_update_timestamp")
     var lastUpdateTimestamp: Timestamp? = null,
 
-    @NotNull
-    @Column(name = "sensitive")
-    val sensitive: Boolean? = null,
+    @Column(name = "sensitive", nullable = false)
+    var sensitive: Boolean? = null,
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "agent_parameter", joinColumns = [
         JoinColumn(name = "agent_id", referencedColumnName = "id")
     ])
     @MapKeyColumn(name = "key")
-    @Column(name = "value")
-    val parameters: Map<String, ByteArray> = mapOf(),
+    @Column(name = "value", length = 1000)
+    var parameters: Map<String, String> = mapOf(),
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "agent_memory", joinColumns = [
         JoinColumn(name = "agent_id", referencedColumnName = "id")
     ])
     @MapKeyColumn(name = "key")
-    @Column(name = "value")
-    val memory: MutableMap<String, String> = mutableMapOf(),
+    @Column(name = "value", length = 1000)
+    var memory: MutableMap<String, String> = mutableMapOf(),
 
     @ElementCollection
     @CollectionTable(name = "agent_data", joinColumns = [
         JoinColumn(name = "agent_id", referencedColumnName = "id")
     ])
     @MapKeyColumn(name = "key")
-    @Column(name = "value")
-    val data: MutableMap<Long, String> = mutableMapOf(),
+    @Column(name = "value", columnDefinition = "text")
+    var data: MutableMap<Long, String> = mutableMapOf(),
 )

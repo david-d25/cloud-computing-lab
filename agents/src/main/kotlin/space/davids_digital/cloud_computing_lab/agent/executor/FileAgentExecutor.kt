@@ -5,6 +5,7 @@ import space.davids_digital.cloud_computing_lab.agent.AgentParameterType
 import space.davids_digital.cloud_computing_lab.agent.context.AgentContext
 import space.davids_digital.cloud_computing_lab.agent.exception.AgentExecutionException
 
+// TODO consider using Amazon S3
 @AgentExecutor("File")
 class FileAgentExecutor(context: AgentContext): AbstractAgentExecutor(context) {
     override fun getParameterTypesMap() = mapOf(

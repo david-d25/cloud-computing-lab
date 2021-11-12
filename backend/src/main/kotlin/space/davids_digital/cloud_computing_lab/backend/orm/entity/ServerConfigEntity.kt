@@ -1,7 +1,5 @@
 package space.davids_digital.cloud_computing_lab.backend.orm.entity
 
-import com.sun.istack.NotNull
-import org.hibernate.Hibernate
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id
@@ -12,7 +10,6 @@ data class ServerConfigEntity(
     @Column(name = "name")
     val name: String? = null,
 
-    @NotNull
-    @Column(name = "value")
+    @Column(name = "value", nullable = false)
     val value: String? = null
 )

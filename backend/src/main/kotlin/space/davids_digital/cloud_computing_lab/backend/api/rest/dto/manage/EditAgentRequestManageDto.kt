@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import space.davids_digital.cloud_computing_lab.backend.model.AgentStatusModel
 import javax.validation.constraints.NotNull
 
-data class UpdateAgentRequestManageDto(
+data class EditAgentRequestManageDto(
     @JsonProperty
     @NotNull
     val id: Int? = null,

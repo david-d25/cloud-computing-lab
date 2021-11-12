@@ -1,6 +1,5 @@
 package space.davids_digital.cloud_computing_lab.backend.orm.entity
 
-import com.sun.istack.NotNull
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.id.MarkChainTransactionId
 import javax.persistence.Column
 import javax.persistence.EmbeddedId
@@ -11,19 +10,15 @@ data class MarkChainTransitionEntity (
     @EmbeddedId
     val id: MarkChainTransactionId? = null,
 
-    @NotNull
-    @Column(name = "continuation")
+    @Column(name = "continuation", nullable = false)
     val continuation: String? = null,
 
-    @NotNull
-    @Column(name = "transition_count")
+    @Column(name = "transition_count", nullable = false)
     val transitionCount: Long? = null,
 
-    @NotNull
-    @Column(name = "start_count")
+    @Column(name = "start_count", nullable = false)
     val startCount: Long? = null,
 
-    @NotNull
-    @Column(name = "end_count")
+    @Column(name = "end_count", nullable = false)
     val endCount: Long? = null
 )

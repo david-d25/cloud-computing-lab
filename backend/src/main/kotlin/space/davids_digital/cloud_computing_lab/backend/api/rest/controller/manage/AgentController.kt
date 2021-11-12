@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*
 import space.davids_digital.cloud_computing_lab.backend.api.rest.dto.manage.AgentResponseManageDto
 import space.davids_digital.cloud_computing_lab.backend.api.rest.dto.manage.CreateAgentRequestManageDto
 import space.davids_digital.cloud_computing_lab.backend.api.rest.dto.manage.DeleteAgentRequestManageDto
-import space.davids_digital.cloud_computing_lab.backend.api.rest.dto.manage.UpdateAgentRequestManageDto
+import space.davids_digital.cloud_computing_lab.backend.api.rest.dto.manage.EditAgentRequestManageDto
 import space.davids_digital.cloud_computing_lab.backend.api.rest.dto.manage.mapping.toModel
 import space.davids_digital.cloud_computing_lab.backend.api.rest.dto.manage.mapping.toResponseManageDto
 import space.davids_digital.cloud_computing_lab.backend.service.AgentService
@@ -16,14 +16,17 @@ import space.davids_digital.cloud_computing_lab.backend.service.AgentService
 class AgentController @Autowired constructor(
     private val agentService: AgentService
 ) {
+    @GetMapping
+    fun getAgents(): List<AgentResponseManageDto> = agentService.getAgents().map { it.toResponseManageDto() }
+
     @PutMapping
-    fun createAgent(@RequestBody agent: CreateAgentRequestManageDto) {
-        agentService.createAgent(agent.toModel())
+    fun createAgent(@RequestBody request: CreateAgentRequestManageDto) {
+        agentService.createAgent(request.toModel())
     }
 
     @PostMapping
-    fun updateAgent(@RequestBody update: UpdateAgentRequestManageDto) {
-        // todo
+    fun editAgent(@RequestBody @Validated edit: EditAgentRequestManageDto) {
+        agentService.editAgent(edit.toModel())
     }
 
     @DeleteMapping
@@ -31,6 +34,8 @@ class AgentController @Autowired constructor(
         agentService.deleteAgent(request.id!!)
     }
 
-    @GetMapping(produces = ["application/json"])
-    fun getAgents(): List<AgentResponseManageDto> = agentService.getAgents().map { it.toResponseManageDto() }
+    @PostMapping("{agentId}/run")
+    fun runAgent(@PathVariable agentId: Int) {
+        agentService.runAgent(agentId)
+    }
 }

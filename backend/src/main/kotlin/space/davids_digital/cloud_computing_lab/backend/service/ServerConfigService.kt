@@ -16,10 +16,13 @@ class ServerConfigService @Autowired constructor(
         return result
     }
 
+    fun getConfig(name: String, default: String? = null): String? {
+        return configRepository.findById(name).map { it.value }.orElse(default)
+    }
+
     @Transactional
     fun setConfig(config: Map<String, String>) {
         configRepository.deleteAll()
         configRepository.saveAll(config.entries.map { ServerConfigEntity(it.key, it.value) })
-        println(configRepository.findAll())
     }
 }

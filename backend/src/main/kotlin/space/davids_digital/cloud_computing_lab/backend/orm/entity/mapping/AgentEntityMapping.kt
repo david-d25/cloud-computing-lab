@@ -19,9 +19,9 @@ fun AgentEntity.toModel() = AgentModel(
     },
     updatePeriodSeconds = updatePeriodSeconds,
     visible = visible!!,
-    lastUpdateTimestamp = lastUpdateTimestamp!!.toInstant(),
+    lastUpdateTimestamp = lastUpdateTimestamp?.toInstant(),
     sensitive = sensitive!!,
-    parameters = parameters.entries.associate { entry -> Pair(entry.key, String(entry.value)) },
+    parameters = parameters,
     memory = memory
 )
 
@@ -39,6 +39,6 @@ fun AgentModel.toEntity() = AgentEntity(
     visible = visible,
     lastUpdateTimestamp = if (lastUpdateTimestamp != null) Timestamp.from(lastUpdateTimestamp) else null,
     sensitive = sensitive,
-    parameters = parameters.entries.associate { entry -> Pair(entry.key, entry.value.toByteArray()) },
+    parameters = parameters,
     memory = memory.toMutableMap()
 )

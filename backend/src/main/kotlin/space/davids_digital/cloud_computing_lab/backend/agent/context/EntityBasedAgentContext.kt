@@ -10,11 +10,9 @@ class EntityBasedAgentContext(
 ): AgentContext() {
     override fun getMemory() = entity.memory.toMap()
 
-    override fun getParameters() =
-        entity.parameters.entries.associate { entry -> Pair(entry.key, String(entry.value)) }
+    override fun getParameters() = entity.parameters.toMap()
 
-    override fun getParameter(key: String) =
-        if (entity.parameters[key] != null) String(entity.parameters[key]!!) else null
+    override fun getParameter(key: String) = entity.parameters[key]
 
     override fun getMemoryEntry(key: String) = entity.memory[key]
 
@@ -39,7 +37,7 @@ class EntityBasedAgentContext(
     }
 
     override fun submitData(data: String) {
-        entity.data[entity.data.keys.maxOf { it }] = data
+        entity.data[entity.data.keys.maxOf { it } + 1] = data
     }
 
     override fun clearData() {

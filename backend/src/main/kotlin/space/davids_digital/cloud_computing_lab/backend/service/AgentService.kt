@@ -1,8 +1,12 @@
 package space.davids_digital.cloud_computing_lab.backend.service
 
+import org.jetbrains.kotlin.diagnostics.reportOnDeclaration
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import space.davids_digital.cloud_computing_lab.backend.model.AgentModel
+import space.davids_digital.cloud_computing_lab.backend.model.CreateAgentRequestModel
+import space.davids_digital.cloud_computing_lab.backend.model.EditAgentRequestModel
+import space.davids_digital.cloud_computing_lab.backend.orm.entity.AgentEntity
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.enum.AgentStatusEntityEnum
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.mapping.toEntity
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.mapping.toModel
@@ -20,17 +24,26 @@ class AgentService @Autowired constructor(
         agentExecutionService.enqueueExecution(id)
     }
 
-    fun editAgent(agent: AgentModel) { // todo this should use separate edit request model
-        agentRepository.save(agent.toEntity())
+    fun editAgent(request: EditAgentRequestModel) {
+        val entity = agentRepository.findById(request.id).orElseThrow { ServiceException("Agent id '${request.id}' not found") }
+        request.name?.let { entity.name = it }
+        request.type?.let { entity.type = it }
+        request.sensitive?.let { entity.sensitive = it }
+        request.parameters?.let { entity.parameters = it }
+        request.updatePeriodSeconds?.let { entity.updatePeriodSeconds = it }
+        request.visible?.let { entity.visible = it }
+        agentRepository.save(entity)
     }
 
-    fun createAgent(agent: AgentModel) { // todo this should use separate create request model
+    fun createAgent(request: CreateAgentRequestModel) {
         agentRepository.save(
-            agent.toEntity().copy(
-                id = null,
-                status = AgentStatusEntityEnum.UNINITIALIZED,
-                lastUpdateTimestamp = null,
-                memory = mutableMapOf()
+            AgentEntity(
+                name = request.name,
+                type = request.type,
+                sensitive = request.sensitive,
+                visible = request.visible,
+                updatePeriodSeconds = request.updatePeriodSeconds,
+                parameters = request.parameters
             )
         )
     }
