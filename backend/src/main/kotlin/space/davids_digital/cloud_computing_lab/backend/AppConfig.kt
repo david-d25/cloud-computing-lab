@@ -27,7 +27,7 @@ import javax.sql.DataSource
 @Import(WebMvcConfig::class)
 @Configuration
 @ComponentScan
-@EnableJpaRepositories
+@EnableJpaRepositories(entityManagerFactoryRef = "sessionFactory")
 @EnableTransactionManagement
 class AppConfig {
     @Bean
@@ -37,16 +37,6 @@ class AppConfig {
         sessionFactory.setPackagesToScan("space.davids_digital")
         sessionFactory.hibernateProperties = hibernateProperties()
         return sessionFactory
-    }
-
-    @Bean
-    fun entityManagerFactory(): LocalContainerEntityManagerFactoryBean {
-        return LocalContainerEntityManagerFactoryBean().also {
-            it.setPackagesToScan("space.davids_digital")
-            it.dataSource = dataSource()
-            it.setJpaProperties(hibernateProperties())
-            it.jpaVendorAdapter = HibernateJpaVendorAdapter()
-        }
     }
 
     @Bean
@@ -78,7 +68,6 @@ class AppConfig {
         properties["hibernate.hbm2ddl.auto"] = "update"
         properties["hibernate.jdbc.batch_size"] = "500"
         properties["hibernate.dialect"] = "org.hibernate.dialect.PostgreSQLDialect"
-        properties["hibernate.show_sql"] = "true"
         return properties
     }
 
