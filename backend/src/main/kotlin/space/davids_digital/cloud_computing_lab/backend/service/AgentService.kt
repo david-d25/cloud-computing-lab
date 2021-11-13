@@ -1,14 +1,11 @@
 package space.davids_digital.cloud_computing_lab.backend.service
 
-import org.jetbrains.kotlin.diagnostics.reportOnDeclaration
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import space.davids_digital.cloud_computing_lab.backend.model.AgentModel
 import space.davids_digital.cloud_computing_lab.backend.model.CreateAgentRequestModel
 import space.davids_digital.cloud_computing_lab.backend.model.EditAgentRequestModel
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.AgentEntity
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.enum.AgentStatusEntityEnum
-import space.davids_digital.cloud_computing_lab.backend.orm.entity.mapping.toEntity
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.mapping.toModel
 import space.davids_digital.cloud_computing_lab.backend.orm.repository.AgentRepository
 import javax.transaction.Transactional

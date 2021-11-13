@@ -8,17 +8,11 @@ import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
-import org.springframework.http.converter.HttpMessageConverter
-import org.springframework.http.converter.StringHttpMessageConverter
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.jdbc.datasource.DriverManagerDataSource
 import org.springframework.orm.hibernate5.HibernateTransactionManager
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.EnableTransactionManagement
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport
 import space.davids_digital.cloud_computing_lab.agent.AgentExecutor
 import java.util.*
 import javax.sql.DataSource
@@ -72,7 +66,7 @@ class AppConfig {
     }
 
     @Bean
-    fun executorsTypeToName(): Map<String, String> {
+    fun agentExecutorsTypeToNameMap(): Map<String, String> {
         val reflections = Reflections("space.davids_digital")
         return reflections.getTypesAnnotatedWith(AgentExecutor::class.java).associate {
             c -> Pair(c.name, c.getAnnotation(AgentExecutor::class.java).value)

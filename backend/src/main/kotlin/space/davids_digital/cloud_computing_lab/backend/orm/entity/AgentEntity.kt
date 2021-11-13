@@ -30,6 +30,9 @@ data class AgentEntity (
     @Column(name = "last_update_timestamp")
     var lastUpdateTimestamp: Timestamp? = null,
 
+    @Column(name = "last_applied_data_entry")
+    var lastAppliedDataEntry: Long? = null,
+
     @Column(name = "sensitive", nullable = false)
     var sensitive: Boolean? = null,
 

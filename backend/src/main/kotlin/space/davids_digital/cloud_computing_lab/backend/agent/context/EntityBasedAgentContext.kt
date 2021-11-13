@@ -23,7 +23,7 @@ class EntityBasedAgentContext(
     override fun getStatus() = when(entity.status!!) {
         AgentStatusEntityEnum.UNINITIALIZED -> AgentStatus.UNINITIALIZED
         AgentStatusEntityEnum.RUNNING -> AgentStatus.RUNNING
-        AgentStatusEntityEnum.SLEEPING -> AgentStatus.SLEEPING
+        AgentStatusEntityEnum.READY -> AgentStatus.SLEEPING
         AgentStatusEntityEnum.ERROR -> AgentStatus.ERROR
     }
 
@@ -31,7 +31,7 @@ class EntityBasedAgentContext(
         entity.status = when(status) {
             AgentStatus.UNINITIALIZED -> AgentStatusEntityEnum.UNINITIALIZED
             AgentStatus.RUNNING -> AgentStatusEntityEnum.RUNNING
-            AgentStatus.SLEEPING -> AgentStatusEntityEnum.SLEEPING
+            AgentStatus.SLEEPING -> AgentStatusEntityEnum.READY
             AgentStatus.ERROR -> AgentStatusEntityEnum.ERROR
         }
     }

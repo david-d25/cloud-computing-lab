@@ -10,6 +10,7 @@ data class AgentModel (
     val visible: Boolean,
     val updatePeriodSeconds: Long?,
     val lastUpdateTimestamp: Instant?,
+    val lastAppliedDataEntry: Long?,
     val sensitive: Boolean,
     val parameters: Map<String, String>,
     val memory: Map<String, String>
