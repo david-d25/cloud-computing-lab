@@ -47,7 +47,7 @@ class LocalClasspathAgentExecutionService @Autowired constructor(
                         entity = agentRepository.save(entity)
                         transaction.commit()
 
-                        entity.status = AgentStatusEntityEnum.SLEEPING
+                        entity.status = AgentStatusEntityEnum.READY
                         entity = agentRepository.save(entity)
                     } catch (e: AgentExecutionException) {
                         transaction.rollback()

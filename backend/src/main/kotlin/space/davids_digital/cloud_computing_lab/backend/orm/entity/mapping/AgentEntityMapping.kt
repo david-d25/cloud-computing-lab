@@ -13,11 +13,12 @@ fun AgentEntity.toModel() = AgentModel(
     status = when(status) {
         AgentStatusEntityEnum.UNINITIALIZED -> AgentStatusModel.UNINITIALIZED
         AgentStatusEntityEnum.RUNNING -> AgentStatusModel.RUNNING
-        AgentStatusEntityEnum.SLEEPING -> AgentStatusModel.SLEEPING
+        AgentStatusEntityEnum.READY -> AgentStatusModel.READY
         AgentStatusEntityEnum.ERROR -> AgentStatusModel.ERROR
         else -> throw IllegalStateException("Wrong 'status' field in AgentEntity")
     },
     updatePeriodSeconds = updatePeriodSeconds,
+    lastAppliedDataEntry = lastAppliedDataEntry,
     visible = visible!!,
     lastUpdateTimestamp = lastUpdateTimestamp?.toInstant(),
     sensitive = sensitive!!,
@@ -32,10 +33,11 @@ fun AgentModel.toEntity() = AgentEntity(
     status = when(status) {
         AgentStatusModel.UNINITIALIZED -> AgentStatusEntityEnum.UNINITIALIZED
         AgentStatusModel.RUNNING -> AgentStatusEntityEnum.RUNNING
-        AgentStatusModel.SLEEPING -> AgentStatusEntityEnum.SLEEPING
+        AgentStatusModel.READY -> AgentStatusEntityEnum.READY
         AgentStatusModel.ERROR -> AgentStatusEntityEnum.ERROR
     },
     updatePeriodSeconds = updatePeriodSeconds,
+    lastAppliedDataEntry = lastAppliedDataEntry,
     visible = visible,
     lastUpdateTimestamp = if (lastUpdateTimestamp != null) Timestamp.from(lastUpdateTimestamp) else null,
     sensitive = sensitive,
