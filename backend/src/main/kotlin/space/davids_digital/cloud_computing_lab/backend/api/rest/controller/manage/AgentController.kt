@@ -5,7 +5,6 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import space.davids_digital.cloud_computing_lab.backend.api.rest.dto.manage.AgentResponseManageDto
 import space.davids_digital.cloud_computing_lab.backend.api.rest.dto.manage.CreateAgentRequestManageDto
-import space.davids_digital.cloud_computing_lab.backend.api.rest.dto.manage.DeleteAgentRequestManageDto
 import space.davids_digital.cloud_computing_lab.backend.api.rest.dto.manage.EditAgentRequestManageDto
 import space.davids_digital.cloud_computing_lab.backend.api.rest.dto.manage.mapping.toModel
 import space.davids_digital.cloud_computing_lab.backend.api.rest.dto.manage.mapping.toResponseManageDto
@@ -29,9 +28,9 @@ class AgentController @Autowired constructor(
         agentService.editAgent(edit.toModel())
     }
 
-    @DeleteMapping
-    fun deleteAgent(@RequestBody @Validated request: DeleteAgentRequestManageDto) {
-        agentService.deleteAgent(request.id!!)
+    @DeleteMapping("{agentId}")
+    fun deleteAgent(@PathVariable agentId: Int) {
+        agentService.deleteAgent(agentId)
     }
 
     @PostMapping("{agentId}/run")
