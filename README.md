@@ -17,6 +17,8 @@ DB_URL=jdbc:postgresql://localhost:5432/cloud_computing_dev
 DB_USERNAME=cloud_computing_dev
 DB_PASSWORD=cloud_computing_dev
 ```
+# Notes
+When deploying to Tomcat for frontend development, please use the ```/api``` context and port ```8080``` so frontend can proxy its requests. 
 ## Amazon roles
 1. cloud_computing_lab_lambda
    - Permissions:
@@ -45,3 +47,6 @@ DB_PASSWORD=cloud_computing_dev
 ## Requirements
 1. NPM 6.*
 2. NodeJS 12.*
+## How to run
+1. Run the backend on ```/api``` context and port ```8080```
+2. ```npm run dev```
