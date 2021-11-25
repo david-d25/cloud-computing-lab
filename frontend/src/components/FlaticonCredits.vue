@@ -1,0 +1,13 @@
+<template>
+  <div class="credits">Icons made by <a href="https://www.flaticon.com/authors/tempo-doloe" title="Tempo_doloe">Tempo_doloe</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+</template>
+
+<script>
+export default {
+  name: "FlaticonCredits"
+}
+</script>
+
+<style scoped>
+
+</style>
