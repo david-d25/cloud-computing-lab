@@ -11,9 +11,7 @@ class ServerConfigController(
     private val configService: ServerConfigService
 ) {
     @GetMapping
-    fun getServerConfig() = ServerConfigResponseManageDto(
-        config = configService.getConfig()
-    )
+    fun getServerConfig() = ServerConfigResponseManageDto(configService.getConfig())
 
     @PostMapping
     fun setServerConfig(@RequestBody request: ServerConfigRequestManageDto) {

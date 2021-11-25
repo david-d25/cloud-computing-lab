@@ -3,6 +3,7 @@ package space.davids_digital.cloud_computing_lab.backend
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.reflections.Reflections
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
@@ -13,7 +14,10 @@ import org.springframework.orm.hibernate5.HibernateTransactionManager
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.EnableTransactionManagement
-import space.davids_digital.cloud_computing_lab.agent.AgentExecutor
+import space.davids_digital.cloud_computing_lab.agent.annotation.AgentExecutor
+import space.davids_digital.cloud_computing_lab.agent.annotation.AgentExecutorParameter
+import space.davids_digital.cloud_computing_lab.backend.model.AgentExecutorMetaInfo
+import space.davids_digital.cloud_computing_lab.backend.model.AgentExecutorParameterMetaInfo
 import java.util.*
 import javax.sql.DataSource
 
@@ -66,10 +70,20 @@ class AppConfig {
     }
 
     @Bean
-    fun agentExecutorsTypeToNameMap(): Map<String, String> {
+    @Qualifier("agentExecutorsMetaInfo")
+    fun agentExecutorsMetaInfo(): Map<String, AgentExecutorMetaInfo> {
         val reflections = Reflections("space.davids_digital")
         return reflections.getTypesAnnotatedWith(AgentExecutor::class.java).associate {
-            c -> Pair(c.name, c.getAnnotation(AgentExecutor::class.java).value)
+            clazz -> Pair(
+                clazz.name,
+                AgentExecutorMetaInfo(
+                    type = clazz.name,
+                    title = clazz.getAnnotation(AgentExecutor::class.java).value,
+                    parameters = clazz.getAnnotationsByType(AgentExecutorParameter::class.java).map {
+                        with(it) { AgentExecutorParameterMetaInfo(name, title, type, required) }
+                    }
+                )
+            )
         }
     }
 
