@@ -89,7 +89,7 @@ module.exports = {
     historyApiFallback: true,
     noInfo: true,
     overlay: true,
-    host: 'localhost', // Host webpack dev server'a
+    host: '0.0.0.0', // Host webpack dev server'a
     port: 3000, // Port webpack dev server'a
     hot: true,
     proxy: {

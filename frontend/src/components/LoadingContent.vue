@@ -1,11 +1,14 @@
 <template>
   <div class="loading_content">
-<!--    TODO maybe the slot could be showed when loading for better UX -->
-    <slot v-if="status === 'ready'"/>
-    <div class="loading" v-if="status === 'loading'">Загрузка...</div>
-    <div class="error" v-if="status === 'error'">Сервер отвалился :(</div>
-    <div class="error" v-if="status === 'offline'">Интернет отвалился &#129430;</div>
-    <btn black mdium thick v-if="status === 'error' || status === 'offline'" @click="$emit('reload')">Ещё раз</btn>
+    <div class="content" :class="{ active: status === 'ready', loading: status === 'loading' }">
+      <slot class="slot" />
+    </div>
+    <div class="overlay" v-if="status !== 'ready'">
+      <div class="loading" v-if="status === 'loading'">Загрузка...</div>
+      <div class="error" v-if="status === 'error'">Сервер отвалился :(</div>
+      <div class="error" v-if="status === 'offline'">Интернет отвалился &#129430;</div>
+      <btn black mdium thick v-if="status === 'error' || status === 'offline'" @click="$emit('reload')">Ещё раз</btn>
+    </div>
   </div>
 </template>
 
@@ -18,17 +21,50 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
   div {
     font-size: 24px;
   }
 
-  .loading {
-    animation: loading_anim 1s ease-in-out infinite;
+  .overlay {
+    .loading {
+      animation: loading_anim 1s ease-in-out infinite;
+    }
+
+    .error {
+      margin-bottom: 25px;
+    }
   }
 
-  .error {
-    margin-bottom: 25px;
+  .loading_content {
+    position: relative;
+  }
+
+  .overlay {
+    position: absolute;
+    width: 100%;
+    top: 50%;
+    left: 50%;
+    margin: auto;
+    transform: translate(-50%, -50%);
+  }
+
+  .content {
+    transition: var(--default-transition), min-height 300ms ease-in-out;
+    pointer-events: none;
+    min-height: 130px;
+    opacity: 0;
+
+    &.loading {
+      opacity: .25;
+      min-height: 50px;
+    }
+
+    &.active {
+      opacity: 1;
+      min-height: 0;
+      pointer-events: auto;
+    }
   }
 
   @keyframes loading_anim {

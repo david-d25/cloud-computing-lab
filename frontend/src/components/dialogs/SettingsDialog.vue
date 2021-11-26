@@ -5,7 +5,7 @@
 
     <toggle-switch class="dark_theme_switch" v-model="darkTheme">Темная тема</toggle-switch>
 
-    <router-link to="/admin">
+    <router-link to="/admin" v-if="$route.path !== '/admin'">
       <btn medium thick black class="button" @click="$store.commit('closeSettings')">
         &#128273; Админ-панель
       </btn>

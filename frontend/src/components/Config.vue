@@ -7,10 +7,14 @@
               :key="item.id">
           <text-input class="input" hint="Имя" v-model="item.name"/>
           <text-input class="input" hint="Значение" v-model="item.value"/>
-          <btn small thick just-a-little-red class="remove_btn" @click="config.splice(index, 1)">&#10060; Удалить</btn>
+          <btn small thick just-a-little-red class="remove_btn" @click="config.splice(index, 1)">
+            &#10060; Удалить
+          </btn>
         </div>
       </div>
-      <div class="no_config" v-else>Пусто...</div>
+      <div style="color: var(--grey); transition: none" v-if="config.length === 0 && configStatus === 'ready'">
+        Пусто...
+      </div>
     </loading-content>
     <btn small grey thick class="add_btn" @click="newConfigItem">&#10133; Добавить</btn>
     <div class="config_controls">
@@ -51,23 +55,30 @@ export default {
   },
   methods: {
     async reloadConfig() {
-      // TODO catch errors
-      this.configStatus = 'loading';
-      let dto = (await axios.get('/api/manage/config')).data;
-      Vue.set(this, 'config', []);
-      for (const [name, value] of Object.entries(dto['config'])) {
-        this.config.push({ name, value });
+      try {
+        this.configStatus = 'loading';
+        let dto = (await axios.get('/api/manage/config')).data;
+        Vue.set(this, 'config', []);
+        for (const [name, value] of Object.entries(dto['config'])) {
+          this.config.push({ name, value });
+        }
+        Vue.set(this, 'originalConfig', JSON.parse(JSON.stringify(this.config)));
+        this.configStatus = 'ready';
+      } catch (e) {
+        this.configStatus = e.request.status === 0 ? 'offline' : 'error';
       }
-      Vue.set(this, 'originalConfig', JSON.parse(JSON.stringify(this.config)));
-      this.configStatus = 'ready';
+
     },
     async saveConfig() {
-      // TODO catch errors
-      this.configStatus = 'loading';
-      let dto = {};
-      this.config.filter(item => item.name.trim().length > 0).forEach(item => dto[item.name] = item.value);
-      await axios.post('/api/manage/config', { config: dto });
-      await this.reloadConfig();
+      try {
+        this.configStatus = 'loading';
+        let dto = {};
+        this.config.filter(item => item.name.trim().length > 0).forEach(item => dto[item.name] = item.value);
+        await axios.post('/api/manage/config', { config: dto });
+        await this.reloadConfig();
+      } catch (e) {
+        this.configStatus = e.request.status === 0 ? 'offline' : 'error';
+      }
     },
     newConfigItem() {
       this.config.push({ name: '', value: '' });
@@ -81,11 +92,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
- /*TODO this rule isn't working for some reason */
-  .no_config {
-    color: var(--grey);
-  }
-
   .config_wr {
     margin-bottom: 25px;
   }
@@ -97,6 +103,10 @@ export default {
 
   .remove_btn {
     width: 100%;
+  }
+
+  .input {
+    margin-bottom: 12px;
   }
 
   .config_controls {

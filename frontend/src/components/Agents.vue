@@ -36,7 +36,7 @@
           </transition-expand>
         </div>
       </div>
-      <div class="no_agents" v-if="agents.length === 0">Пусто...</div>
+      <div class="no_agents" v-if="agents.length === 0 && agentsStatus === 'ready'">Пусто...</div>
     </loading-content>
 
     <btn small grey thick class="add_btn" @click="createDialog = true">&#10133; Добавить</btn>
@@ -57,6 +57,7 @@
                   hint="Период обновления (сек)"
                   :error-hint="newAgentForm.updatePeriodSeconds.error"
                   v-model="newAgentForm.updatePeriodSeconds.value"/>
+
       <toggle-switch class="input" v-model="newAgentForm.visible.value">Видимый</toggle-switch>
       <toggle-switch class="input" v-model="newAgentForm.sensitive.value">Чувствительный контент</toggle-switch>
       <loading-content :status="newAgentFormStatus" @reload="createAgent">
@@ -283,6 +284,7 @@ export default {
     .body {
       font-size: 18px;
       padding: 15px;
+      overflow: auto;
       border-top: 1px solid var(--grey);
     }
 
