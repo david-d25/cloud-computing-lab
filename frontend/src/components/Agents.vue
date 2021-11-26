@@ -30,7 +30,7 @@
                 <btn small thin grey>&#9999; Редактировать</btn>
                 <btn small thin grey @click="deleteDialogTargetId = agent.id">&#10060; Удалить</btn>
 <!--                TODO-->
-                <btn small thin grey>&#128640; Запустить сейчас</btn>
+                <btn small thin grey v-if="agent.status !== 'RUNNING'">&#128640; Запустить сейчас</btn>
               </div>
             </div>
           </transition-expand>
@@ -43,19 +43,33 @@
 
     <dialog-popup :show="createDialog" @close="createDialog = false">
       <div class="title">Новый агент</div>
-<!--      TODO clear form inputs after submit-->
-      <text-input class="input" hint="Название" :error-hint="newAgentForm.name.error" v-model="newAgentForm.name.value"/>
-      <text-input class="input" hint="Тип" :error-hint="newAgentForm.type.error" v-model="newAgentForm.type.value"/>
-      <text-input class="input" type="number" hint="Период обновления (сек)" :error-hint="newAgentForm.updatePeriodSeconds.error" v-model="newAgentForm.updatePeriodSeconds.value"/>
+      <text-input class="input"
+                  hint="Название"
+                  :error-hint="newAgentForm.name.error"
+                  v-model="newAgentForm.name.value"/>
+      <single-select class="input"
+                     placeholder="Тип"
+                     v-model="newAgentForm.type.value"
+                     :error-hint="newAgentForm.type.error"
+                     :options="agentTypes.map(type => { return { value: type.type, title: type.title }})"/>
+      <text-input class="input"
+                  type="number"
+                  hint="Период обновления (сек)"
+                  :error-hint="newAgentForm.updatePeriodSeconds.error"
+                  v-model="newAgentForm.updatePeriodSeconds.value"/>
       <toggle-switch class="input" v-model="newAgentForm.visible.value">Видимый</toggle-switch>
       <toggle-switch class="input" v-model="newAgentForm.sensitive.value">Чувствительный контент</toggle-switch>
-      <btn black thick medium class="dialog_button" @click="createAgent">Создать</btn>
+      <loading-content :status="newAgentFormStatus" @reload="createAgent">
+        <btn black thick medium class="dialog_button create_button" @click="createAgent">Создать</btn>
+      </loading-content>
     </dialog-popup>
 
     <dialog-popup :show="deleteDialogTargetId" @close="deleteDialogTargetId = null">
       <div class="title">Точно удалить?</div>
-      <btn black thick medium class="dialog_button" @click="deleteAgent">Точно</btn>
-      <btn black thick medium class="dialog_button" @click="deleteDialogTargetId = null">Не точно</btn>
+      <loading-content :status="deleteDialogStatus" @reload="deleteAgent">
+        <btn black thick medium class="dialog_button" @click="deleteAgent">Точно</btn>
+        <btn black thick medium class="dialog_button" @click="deleteDialogTargetId = null">Не точно</btn>
+      </loading-content>
     </dialog-popup>
   </container>
 </template>
@@ -70,16 +84,21 @@ import TextInput from "#/components/TextInput";
 import ToggleSwitch from "#/components/ToggleSwitch";
 import TransitionExpand from "#/components/TransitionExpand";
 import Vue from "vue";
+import MessagePanel from "#/components/MessagePanel";
+import SingleSelect from "#/components/SingleSelect";
 
 export default {
   name: "Agents",
-  components: {TransitionExpand, ToggleSwitch, TextInput, LoadingContent, DialogPopup, Container, Btn },
+  components: {SingleSelect, MessagePanel, TransitionExpand, ToggleSwitch, TextInput, LoadingContent, DialogPopup, Container, Btn },
   data() {
     return {
       agents: [],
+      agentTypes: [],
       agentsStatus: 'loading',
       createDialog: false,
+      deleteDialogStatus: 'ready',
       deleteDialogTargetId: null,
+      newAgentFormStatus: 'ready',
       newAgentForm: {
         name: { value: '', error: null },
         type: { value: '', error: null },
@@ -96,8 +115,9 @@ export default {
     async reloadAgents() {
       try {
         this.agentsStatus = "loading";
-        this.agents = (await axios.get('/api/manage/agent')).data
+        this.agents = (await axios.get('/api/manage/agent')).data;
         this.agents.forEach(agent => Vue.set(agent, 'expanded', false));
+        this.agentTypes = (await axios.get('/api/manage/agent/type')).data;
         this.agentsStatus = "ready";
       } catch (e) {
         this.agentsStatus = e.request.status === 0 ? 'offline' : 'error';
@@ -131,30 +151,54 @@ export default {
       return true;
     },
 
+    resetNewAgentForm() {
+      this.newAgentForm.name.value = '';
+      this.newAgentForm.type.value = '';
+      this.newAgentForm.updatePeriodSeconds.value = '';
+      this.newAgentForm.visible.value = true;
+      this.newAgentForm.sensitive.value = false;
+    },
+
     async createAgent() {
       if (
         this.validateNotBlank(this.newAgentForm.name) &&
         this.validateNotBlank(this.newAgentForm.type) &&
         this.validateNotNegative(this.newAgentForm.updatePeriodSeconds)
       ) {
-        // TODO catch errors
-        await axios.put('/api/manage/agent', {
-          name: this.newAgentForm.name.value,
-          type: this.newAgentForm.type.value,
-          updatePeriodSeconds: +this.newAgentForm.updatePeriodSeconds.value,
-          sensitive: this.newAgentForm.sensitive.value,
-          visible: this.newAgentForm.visible.value
-        });
-        this.createDialog = false;
-        await this.reloadAgents();
+        this.newAgentFormStatus = 'loading';
+        try {
+          await axios.put('/api/manage/agent', {
+            name: this.newAgentForm.name.value,
+            type: this.newAgentForm.type.value,
+            updatePeriodSeconds: +this.newAgentForm.updatePeriodSeconds.value,
+            sensitive: this.newAgentForm.sensitive.value,
+            visible: this.newAgentForm.visible.value
+          });
+          this.newAgentFormStatus = 'ready';
+          this.createDialog = false;
+          this.resetNewAgentForm();
+          await this.reloadAgents();
+        } catch (e) {
+          this.newAgentFormStatus = e.request.status === 0 ? 'offline' : 'error';
+        }
       }
     },
 
     async deleteAgent() {
-      // TODO catch errors
-      await axios.delete(`/api/manage/agent/${this.deleteDialogTargetId}`);
-      this.deleteDialogTargetId = null;
-      await this.reloadAgents();
+      try {
+        this.deleteDialogStatus = 'loading';
+        await axios.delete(`/api/manage/agent/${this.deleteDialogTargetId}`);
+        this.deleteDialogTargetId = null;
+        this.deleteDialogStatus = 'ready';
+        await this.reloadAgents();
+      } catch (e) {
+        this.deleteDialogStatus = e.request.status === 0 ? 'offline' : 'error';
+      }
+    }
+  },
+  watch: {
+    deleteDialogTargetId() {
+      this.deleteDialogStatus = 'ready';
     }
   }
 }
@@ -180,12 +224,16 @@ export default {
 
   .input {
     width: 100%;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
   }
 
   .dialog_button {
     min-width: 320px;
     margin-bottom: 20px;
+  }
+
+  .create_button {
+    margin-top: 10px;
   }
 
   .agent_wr {

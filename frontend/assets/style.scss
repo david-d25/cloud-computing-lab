@@ -5,6 +5,8 @@
   box-sizing: border-box;
   color: var(--text-color);
   transition: var(--default-transition);
+  outline-color: var(--stroke);
+  outline-width: 2px;
 }
 
 body {

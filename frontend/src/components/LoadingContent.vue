@@ -4,8 +4,8 @@
     <slot v-if="status === 'ready'"/>
     <div class="loading" v-if="status === 'loading'">Загрузка...</div>
     <div class="error" v-if="status === 'error'">Сервер отвалился :(</div>
-    <div class="error" v-if="status === 'offline'">Вы не подключены к интернету &#129430;</div>
-    <btn black mdium thick v-if="status === 'error' || status === 'offline'" @click="$emit('reload')">Обновить</btn>
+    <div class="error" v-if="status === 'offline'">Интернет отвалился &#129430;</div>
+    <btn black mdium thick v-if="status === 'error' || status === 'offline'" @click="$emit('reload')">Ещё раз</btn>
   </div>
 </template>
 

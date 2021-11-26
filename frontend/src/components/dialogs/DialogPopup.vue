@@ -45,7 +45,11 @@ export default {
 
   .dialog_content {
     bottom: 0;
-    width: 100vw;
+    width: calc(100vw - (100vw - 100%)); // Workaround for scrollbar
+    max-width: 600px;
+    left: 0;
+    right: 0;
+    margin: auto;
     padding: 25px;
     min-height: 25vh;
     position: fixed;

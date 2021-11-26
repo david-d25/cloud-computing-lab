@@ -28,18 +28,24 @@
 import TransitionExpand from "#/components/TransitionExpand";
 export default {
   components: { TransitionExpand },
-  props: ['hint', 'value', 'prefix', 'errorHint', 'type'],
+  props: {
+    hint: String,
+    value: {
+      type: String,
+      default: ''
+    },
+    prefix: String,
+    errorHint: String,
+    type: String
+  },
   data() {
     return {
-      localText: ''
+      localText: this.value === undefined ? '' : this.value
     }
-  },
-  mounted() {
-    this.localText = this.value;
   },
   watch: {
     value() {
-      this.localText = this.value;
+      this.localText = this.value === undefined ? '' : this.value;
     },
     localText() {
       this.$emit('input', this.localText);
@@ -57,7 +63,8 @@ export default {
   flex: 1;
   display: flex;
   padding: 10px;
-  font-size: 16px;
+  font-size: 22px;
+  line-height: 22px;
   position: relative;
   justify-content: flex-start;
 }
@@ -71,7 +78,7 @@ export default {
 }
 .input_prefix {
   opacity: .5;
-  font-size: 16px;
+  font-size: inherit;
 }
 
 .input_hint {
@@ -79,7 +86,7 @@ export default {
   position: absolute;
   top: 25%;
   padding: 0 5px;
-  transform: translateX(-5px);
+  font-size: 0.8em;
   transition: var(--default-transition), top 200ms ease-in-out;
   background: var(--background);
 
@@ -93,7 +100,7 @@ export default {
   border: none;
   background: none;
   outline: none;
-  font-size: 16px;
+  font-size: inherit;
   width: 100%;
   padding: 0;
   flex: 1;
@@ -103,11 +110,14 @@ export default {
     top: -25%;
   }
 }
+
 [data-state-wrong='true'] {
   border: 1px solid rgba(255, 0, 0, .5);
   box-shadow: 0 0 2px red;
 }
+
 .err_msg {
   color: darkred;
+  font-size: 16px;
 }
 </style>

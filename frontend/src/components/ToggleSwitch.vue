@@ -36,12 +36,14 @@ export default {
 
   .switch_text {
     font-size: 24px;
+    text-align: left;
   }
 
   .switch {
     position: relative;
     display: inline-block;
     margin-right: 10px;
+    min-width: 60px;
     width: 60px;
     height: 34px;
 
