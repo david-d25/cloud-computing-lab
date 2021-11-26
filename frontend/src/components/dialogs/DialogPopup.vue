@@ -52,6 +52,8 @@ export default {
     margin: auto;
     padding: 25px;
     min-height: 25vh;
+    max-height: 100vh;
+    overflow: auto;
     position: fixed;
     border-radius: 25px 25px 0 0;
     background: var(--background);

@@ -57,7 +57,19 @@
                   hint="Период обновления (сек)"
                   :error-hint="newAgentForm.updatePeriodSeconds.error"
                   v-model="newAgentForm.updatePeriodSeconds.value"/>
-
+      <transition-expand>
+        <div class="agent_parameters" v-if="newAgentForm.type.value">
+          <div class="agent_parameter"
+               v-for="parameter in agentTypes.find(t => t.type === newAgentForm.type.value).parameters"
+               :key="parameter.name">
+            <text-input class="input"
+                        v-model="newAgentForm.parameters[parameter.name].value"
+                        :type="parameter.type"
+                        :hint="parameter.title"
+                        :error-hint="newAgentForm.parameters[parameter.name].error"/>
+          </div>
+        </div>
+      </transition-expand>
       <toggle-switch class="input" v-model="newAgentForm.visible.value">Видимый</toggle-switch>
       <toggle-switch class="input" v-model="newAgentForm.sensitive.value">Чувствительный контент</toggle-switch>
       <loading-content :status="newAgentFormStatus" @reload="createAgent">
@@ -106,6 +118,7 @@ export default {
         updatePeriodSeconds: { value: '', error: null },
         visible: { value: true },
         sensitive: { value: false },
+        parameters: {}
       }
     }
   },
@@ -135,7 +148,7 @@ export default {
     },
 
     validateNotBlank(formEl) {
-      if (formEl.value.trim().length === 0) {
+      if (formEl.value == null || formEl.value.trim().length === 0) {
         formEl.error = 'Это поле не должно быть пустым';
         return false;
       }
@@ -161,19 +174,32 @@ export default {
     },
 
     async createAgent() {
-      if (
-        this.validateNotBlank(this.newAgentForm.name) &&
-        this.validateNotBlank(this.newAgentForm.type) &&
-        this.validateNotNegative(this.newAgentForm.updatePeriodSeconds)
-      ) {
+      let ready = true;
+      ready &= this.validateNotBlank(this.newAgentForm.name);
+      ready &= this.validateNotBlank(this.newAgentForm.type);
+      ready &= this.validateNotNegative(this.newAgentForm.updatePeriodSeconds);
+      if (this.newAgentForm.type.value) {
+        for (let parameter of this.agentTypes.find(t => t.type === this.newAgentForm.type.value).parameters) {
+          if (parameter.required) {
+            ready &= this.validateNotBlank(this.newAgentForm.parameters[parameter.name]);
+          }
+        }
+      }
+
+      if (ready) {
         this.newAgentFormStatus = 'loading';
         try {
+          let parameters = {};
+          for (let name in this.newAgentForm.parameters)
+            parameters[name] = this.newAgentForm.parameters[name].value;
+
           await axios.put('/api/manage/agent', {
             name: this.newAgentForm.name.value,
             type: this.newAgentForm.type.value,
             updatePeriodSeconds: +this.newAgentForm.updatePeriodSeconds.value,
             sensitive: this.newAgentForm.sensitive.value,
-            visible: this.newAgentForm.visible.value
+            visible: this.newAgentForm.visible.value,
+            parameters
           });
           this.newAgentFormStatus = 'ready';
           this.createDialog = false;
@@ -200,6 +226,14 @@ export default {
   watch: {
     deleteDialogTargetId() {
       this.deleteDialogStatus = 'ready';
+    },
+    "newAgentForm.type.value": function() {
+      this.newAgentForm.parameters = {};
+      if (this.newAgentForm.type.value) {
+        this.agentTypes.find(t => t.type === this.newAgentForm.type.value).parameters.forEach(p =>
+          this.newAgentForm.parameters[p.name] = { value: '', error: null }
+        )
+      }
     }
   }
 }

@@ -68,7 +68,7 @@ export default {
     padding: 10px;
     border: 1px solid var(--grey);
     background: var(--background);
-    min-height: 22px;
+    min-height: 27px;
     box-sizing: content-box;
     border-radius: 4px;
     position: relative;
@@ -76,6 +76,7 @@ export default {
 
   .title {
     text-align: left;
+    line-height: 27px;
   }
 
   .placeholder {
