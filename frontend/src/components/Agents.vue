@@ -27,10 +27,9 @@
             <div class="agent_controls_wr" v-if="agent.expanded">
               <div class="agent_controls">
 <!--                TODO-->
-                <btn small thin grey>&#9999; Редактировать</btn>
+                <btn small thin grey disabled>&#9999; Редактировать</btn>
                 <btn small thin grey @click="deleteDialogTargetId = agent.id">&#10060; Удалить</btn>
-<!--                TODO-->
-                <btn small thin grey v-if="agent.status !== 'RUNNING'">&#128640; Запустить сейчас</btn>
+                <btn small thin grey v-if="agent.status !== 'RUNNING'" @click="runAgent(agent.id)">&#128640; Запустить сейчас</btn>
               </div>
             </div>
           </transition-expand>
@@ -171,6 +170,7 @@ export default {
       this.newAgentForm.updatePeriodSeconds.value = '';
       this.newAgentForm.visible.value = true;
       this.newAgentForm.sensitive.value = false;
+      this.newAgentForm.parameters = {};
     },
 
     async createAgent() {
@@ -208,6 +208,17 @@ export default {
         } catch (e) {
           this.newAgentFormStatus = e.request.status === 0 ? 'offline' : 'error';
         }
+      }
+    },
+
+    async runAgent(agentId) {
+      try {
+        this.agentsStatus = 'loading';
+        await axios.post(`/api/manage/agent/${agentId}/run`);
+        this.agentsStatus = 'ready';
+        await this.reloadAgents();
+      } catch (e) {
+        this.agentsStatus = e.request.status === 0 ? 'offline' : 'error';
       }
     },
 

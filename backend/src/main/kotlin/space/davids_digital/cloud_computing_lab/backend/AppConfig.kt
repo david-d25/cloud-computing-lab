@@ -66,6 +66,7 @@ class AppConfig {
         properties["hibernate.hbm2ddl.auto"] = "update"
         properties["hibernate.jdbc.batch_size"] = "500"
         properties["hibernate.dialect"] = "org.hibernate.dialect.PostgreSQLDialect"
+        properties["hibernate.show_sql"] = "true"
         return properties
     }
 

@@ -48,6 +48,11 @@
       border-radius: 15px;
     }
 
+    &[disabled] {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
     &[medium] {
       height: 50px;
       font-size: 18px;

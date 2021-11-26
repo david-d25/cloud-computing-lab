@@ -37,7 +37,8 @@ class EntityBasedAgentContext(
     }
 
     override fun submitData(data: String) {
-        entity.data[entity.data.keys.maxOf { it } + 1] = data
+        val nextKey = if (entity.data.isNotEmpty()) entity.data.keys.maxOf { it } + 1 else 0
+        entity.data[nextKey] = data
     }
 
     override fun clearData() {

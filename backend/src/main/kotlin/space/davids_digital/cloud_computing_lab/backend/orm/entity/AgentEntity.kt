@@ -1,5 +1,6 @@
 package space.davids_digital.cloud_computing_lab.backend.orm.entity
 
+import org.hibernate.annotations.Fetch
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.enum.AgentStatusEntityEnum
 import java.sql.Timestamp
 import javax.persistence.*
@@ -52,7 +53,7 @@ data class AgentEntity (
     @Column(name = "value", columnDefinition = "text")
     var memory: MutableMap<String, String> = mutableMapOf(),
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "agent_data", joinColumns = [
         JoinColumn(name = "agent_id", referencedColumnName = "id")
     ])
