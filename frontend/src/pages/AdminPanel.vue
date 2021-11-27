@@ -16,12 +16,14 @@
       <template v-slot:config><config/></template>
     </tabbed-view>
 
-    <div class="bottom_buttons">
-      <btn small grey thin @click="$store.commit('openSettings')">&#9881;&#65039; Настройки</btn>
-      <router-link to="/">
-        <btn small grey thin>&#127968; Главная</btn>
-      </router-link>
-    </div>
+    <container>
+      <div class="bottom_buttons">
+        <btn small grey thin @click="$store.commit('openSettings')">&#9881;&#65039; Настройки</btn>
+        <router-link to="/">
+          <btn small grey thin>&#127968; Главная</btn>
+        </router-link>
+      </div>
+    </container>
   </div>
 </template>
 
@@ -30,10 +32,11 @@
   import TabbedView from "#/components/TabbedView";
   import Agents from "#/components/Agents";
   import Config from "#/components/Config";
+  import Container from "#/components/Container";
 
   export default {
     name: "AdminPanel",
-    components: {Config, Agents, TabbedView, Btn}
+    components: {Container, Config, Agents, TabbedView, Btn}
   }
 </script>
 
@@ -52,7 +55,7 @@
     display: flex;
     justify-content: space-between;
     width: 100%;
-    padding: 35px;
+    padding: 35px 0;
   }
 
   h1 {

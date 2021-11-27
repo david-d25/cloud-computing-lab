@@ -63,4 +63,8 @@ export default {
       transform: translateY(100%);
     }
   }
+
+  [red-background] .dialog_content {
+    background: var(--red-background);
+  }
 </style>

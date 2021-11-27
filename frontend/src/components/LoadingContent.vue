@@ -67,6 +67,10 @@ export default {
     }
   }
 
+  .loading_content[hide-on-loading] .content .loading {
+    opacity: 0;
+  }
+
   @keyframes loading_anim {
     0%   { opacity: 0.1; }
     50%  { opacity: 1.0; }

@@ -11,7 +11,7 @@
 <style scoped lang="scss">
   button {
     cursor: pointer;
-    background: var(--background);
+    background: transparent;
     border-radius: 32px;
     color: var(--text-color);
     border: solid black;
@@ -31,6 +31,11 @@
       border-color: var(--grey);
     }
 
+    &[on-dark-background] {
+      border-color: white;
+      color: white;
+    }
+
     &[just-a-little-red] {
       border-color: var(--just-a-little-red);
     }
@@ -46,6 +51,12 @@
     &[big] {
       height: 66px;
       border-radius: 15px;
+    }
+
+    &[very-big] {
+      height: 80px;
+      padding: 22px 36px;
+      border-radius: 5px;
     }
 
     &[disabled] {
