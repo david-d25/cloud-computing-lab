@@ -1,10 +1,8 @@
 package space.davids_digital.cloud_computing_lab.backend.service
 
-import org.hibernate.SessionFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
-
 import space.davids_digital.cloud_computing_lab.agent.AgentConstants.Companion.ERROR_MESSAGE
 import space.davids_digital.cloud_computing_lab.agent.context.AgentContext
 import space.davids_digital.cloud_computing_lab.agent.exception.AgentExecutionException
@@ -12,16 +10,16 @@ import space.davids_digital.cloud_computing_lab.agent.executor.AbstractAgentExec
 import space.davids_digital.cloud_computing_lab.backend.agent.context.EntityBasedAgentContext
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.enum.AgentStatusEntityEnum
 import space.davids_digital.cloud_computing_lab.backend.orm.repository.AgentRepository
-import java.lang.Exception
 import java.sql.Timestamp
 import java.time.Instant
 import java.util.concurrent.Executors
+import javax.persistence.EntityManagerFactory
 
 @Service
 @Qualifier("local-classpath")
 class LocalClasspathAgentExecutionService @Autowired constructor(
     private val agentRepository: AgentRepository,
-    private val sessionFactory: SessionFactory
+    private val entityManagerFactory: EntityManagerFactory
 ): AgentExecutionService {
     private val executorService = Executors.newCachedThreadPool()
 
@@ -35,7 +33,7 @@ class LocalClasspathAgentExecutionService @Autowired constructor(
                 val executor = constructor.newInstance(context) as AbstractAgentExecutor
 
                 executorService.execute {
-                    val entityManager = sessionFactory.createEntityManager()
+                    val entityManager = entityManagerFactory.createEntityManager()
                     val transaction = entityManager.transaction
                     try {
                         entity.lastUpdateTimestamp = Timestamp.from(Instant.now())
@@ -50,23 +48,24 @@ class LocalClasspathAgentExecutionService @Autowired constructor(
                         transaction.rollback()
                         entity.status = AgentStatusEntityEnum.ERROR
                         entity.memory[ERROR_MESSAGE] = e.message
-                    } catch (e: Exception) {
+                    } catch (e: Throwable) {
                         e.printStackTrace()
                         transaction.rollback()
                         entity.status = AgentStatusEntityEnum.ERROR
                         entity.memory[ERROR_MESSAGE] = "Unknown agent execution error"
                     } finally {
+                        agentRepository.save(entity)
                         entityManager.close()
                     }
                 }
             } else {
                 entity.status = AgentStatusEntityEnum.ERROR
                 entity.memory[ERROR_MESSAGE] = "Agent id '${id}' has wrong type"
+                agentRepository.save(entity)
             }
         } catch (e: ClassNotFoundException) {
             entity.status = AgentStatusEntityEnum.ERROR
             entity.memory[ERROR_MESSAGE] = "Agent of type '${entity.type}' not found"
-        } finally {
             agentRepository.save(entity)
         }
     }
