@@ -5,6 +5,6 @@ import space.davids_digital.cloud_computing_lab.backend.model.AgentModel
 
 fun AgentModel.toStyleDto() = StyleDto(
     id = id,
-    name = name,
+    title = name,
     sensitive = sensitive
 )

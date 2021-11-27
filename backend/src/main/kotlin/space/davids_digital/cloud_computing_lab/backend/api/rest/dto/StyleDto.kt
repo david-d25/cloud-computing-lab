@@ -7,7 +7,7 @@ data class StyleDto(
     val id: Int? = null,
 
     @JsonProperty("name")
-    val name: String? = null,
+    val title: String? = null,
 
     @JsonProperty("sensitive")
     val sensitive: Boolean? = null
