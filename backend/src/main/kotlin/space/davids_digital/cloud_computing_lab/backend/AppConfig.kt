@@ -12,6 +12,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.jdbc.datasource.DriverManagerDataSource
 import org.springframework.orm.hibernate5.HibernateTransactionManager
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean
+import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.EnableTransactionManagement
 import space.davids_digital.cloud_computing_lab.agent.annotation.AgentExecutor
@@ -25,6 +26,7 @@ import javax.sql.DataSource
 @Import(WebMvcConfig::class)
 @Configuration
 @ComponentScan
+@EnableScheduling
 @EnableJpaRepositories(entityManagerFactoryRef = "sessionFactory")
 @EnableTransactionManagement
 class AppConfig {

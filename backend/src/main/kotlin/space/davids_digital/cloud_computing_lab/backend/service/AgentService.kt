@@ -17,6 +17,10 @@ class AgentService @Autowired constructor(
 ) {
     fun getAgents() = agentRepository.findAll().map { it.toModel() }
 
+    fun getAgentNeedingModelUpdateIds() = agentRepository.getAgentNeedingModelUpdateIds()
+    fun getAgentDataEntriesSize(id: Int) = agentRepository.getAgentDataEntriesSize(id)
+    fun getAgentLastAppliedDataEntryId(id: Int) = agentRepository.getAgentLastAppliedDataEntryId(id)
+
     fun runAgent(id: Int) {
         agentExecutionService.enqueueExecution(id)
     }
@@ -29,6 +33,7 @@ class AgentService @Autowired constructor(
         request.parameters?.let { entity.parameters = it }
         request.updatePeriodSeconds?.let { entity.updatePeriodSeconds = it }
         request.visible?.let { entity.visible = it }
+        request.lastAppliedDataEntry?.let { entity.lastAppliedDataEntry = it }
         agentRepository.save(entity)
     }
 

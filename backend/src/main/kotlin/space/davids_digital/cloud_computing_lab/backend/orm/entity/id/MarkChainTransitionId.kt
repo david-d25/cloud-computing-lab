@@ -4,11 +4,10 @@ import java.io.Serializable
 import javax.persistence.*
 
 @Embeddable
-data class MarkChainTransactionId (
-    @Column(name = "agent_id")
+data class MarkChainTransitionId (
+    @Column(name = "agent_id", nullable = false)
     var agentId: Int? = null,
 
-    @Column(name = "entry_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @Column(name = "entry_id", nullable = false)
     var entryId: Int? = null
 ): Serializable

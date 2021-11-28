@@ -4,5 +4,11 @@ import space.davids_digital.cloud_computing_lab.backend.api.rest.dto.manage.Edit
 import space.davids_digital.cloud_computing_lab.backend.model.EditAgentRequestModel
 
 fun EditAgentRequestManageDto.toModel() = EditAgentRequestModel(
-    id = id!!, name, type, visible, sensitive, updatePeriodSeconds, parameters
+    id = id!!,
+    name = name,
+    type = type,
+    visible = visible,
+    sensitive = sensitive,
+    updatePeriodSeconds = updatePeriodSeconds,
+    parameters = parameters
 )

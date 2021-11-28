@@ -13,6 +13,7 @@ object Tokenizer {
     private fun String?.isTerminator() = this?.matches(Regex("[.?!]+")) ?: false
     private fun String?.isWord() = this != null && this.matches(Regex("[()\\p{L}+*<>{}\\[\\]!@#\$%^&\"'`~-]+|\\d+"))
 
+    // TODO this works wrong
     fun generateTransitions(text: String, maxWordsPerTransition: Int): Set<Transition> {
         val tokens = tokenize(text)
         val result = mutableMapOf<String?, Transition>()

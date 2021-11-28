@@ -7,5 +7,6 @@ data class EditAgentRequestModel(
     val visible: Boolean? = null,
     val sensitive: Boolean? = null,
     val updatePeriodSeconds: Long? = null,
+    val lastAppliedDataEntry: Long? = null,
     val parameters: Map<String, String>? = null
 )

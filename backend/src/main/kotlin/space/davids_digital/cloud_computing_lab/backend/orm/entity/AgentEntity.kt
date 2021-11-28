@@ -1,6 +1,5 @@
 package space.davids_digital.cloud_computing_lab.backend.orm.entity
 
-import org.hibernate.annotations.Fetch
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.enum.AgentStatusEntityEnum
 import java.sql.Timestamp
 import javax.persistence.*
