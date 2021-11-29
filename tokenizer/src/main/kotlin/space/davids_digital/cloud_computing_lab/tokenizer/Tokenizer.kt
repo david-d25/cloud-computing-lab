@@ -13,15 +13,15 @@ object Tokenizer {
     private fun String?.isTerminator() = this?.matches(Regex("[.?!]+")) ?: false
     private fun String?.isWord() = this != null && this.matches(Regex("[()\\p{L}+*<>{}\\[\\]!@#\$%^&\"'`~-]+|\\d+"))
 
-    // TODO this works wrong
     fun generateTransitions(text: String, maxWordsPerTransition: Int): Set<Transition> {
         val tokens = tokenize(text)
-        val result = mutableMapOf<String?, Transition>()
-        fun MutableMap<String?, Transition>.putTransition(beginning: String?, continuation: String?) {
-            if (!containsKey(beginning))
-                this[beginning] = Transition(beginning, continuation, 1)
+        val result = mutableMapOf<Pair<String?, String?>, Transition>()
+        fun MutableMap<Pair<String?, String?>, Transition>.putTransition(beginning: String?, continuation: String?) {
+            val key = Pair(beginning, continuation)
+            if (!containsKey(key))
+                this[key] = Transition(beginning, continuation, 1)
             else
-                this[beginning]!!.count++
+                this[key]!!.count++
         }
 
         fun getToken(i: Int) = if (i >= 0 && i < tokens.size) tokens[i] else null
@@ -45,7 +45,8 @@ object Tokenizer {
             while (counter < nWords) {
                 val token = getToken(i)
                 if (token.isWord()) {
-                    buffer.append(" ")
+                    if (counter > 0)
+                        buffer.append(" ")
                     counter++
                 }
                 buffer.append(token)
@@ -70,7 +71,7 @@ object Tokenizer {
             repeat(maxWordsPerTransition) {
                 val wordsToUse = it + 1
                 if (wordsAvailable >= wordsToUse) {
-                    result.putTransition(beginning, grabNextNWords(i, wordsToUse))
+                    result.putTransition(beginning, grabNextNWords(i + 1, wordsToUse))
                 } else if (wordsToUse == 1 && wordsAvailable == 0)
                     result.putTransition(beginning, null)
             }
