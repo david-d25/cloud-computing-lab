@@ -13,4 +13,6 @@ interface MarkChainTransitionRepository: CrudRepository<MarkChainTransitionEntit
 
     @Query("select max(entryId) from mark_chain_transition where agentId = :id")
     fun getMaxEntryIdByAgentId(id: Int): Int?
+
+    fun findAllByIdAgentId(ids: Iterable<Int>): Iterable<MarkChainTransitionEntity>
 }
