@@ -8,12 +8,14 @@ import space.davids_digital.cloud_computing_lab.backend.orm.entity.AgentEntity
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.enum.AgentStatusEntityEnum
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.mapping.toModel
 import space.davids_digital.cloud_computing_lab.backend.orm.repository.AgentRepository
+import space.davids_digital.cloud_computing_lab.backend.orm.repository.MarkChainTransitionRepository
 import javax.transaction.Transactional
 
 @Service
 class AgentService @Autowired constructor(
     private val agentRepository: AgentRepository,
-    private val agentExecutionService: AgentExecutionService
+    private val agentExecutionService: AgentExecutionService,
+    private val markChainTransitionRepository: MarkChainTransitionRepository
 ) {
     fun getAgents() = agentRepository.findAll().map { it.toModel() }
 
@@ -56,6 +58,7 @@ class AgentService @Autowired constructor(
         val entity = agentRepository.findById(id).orElseThrow { ServiceException("Agent id $id not found") }
         if (entity.status == AgentStatusEntityEnum.RUNNING)
             throw ServiceException("Running agent can't be deleted")
+        markChainTransitionRepository.removeByAgentId(id)
         agentRepository.delete(entity)
     }
 }

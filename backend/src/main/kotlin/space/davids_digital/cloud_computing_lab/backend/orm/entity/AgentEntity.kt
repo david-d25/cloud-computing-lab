@@ -58,5 +58,5 @@ data class AgentEntity (
     ])
     @MapKeyColumn(name = "key")
     @Column(name = "value", columnDefinition = "text")
-    var data: MutableMap<Long, String> = mutableMapOf(),
+    var data: MutableMap<Long, String> = mutableMapOf()
 )

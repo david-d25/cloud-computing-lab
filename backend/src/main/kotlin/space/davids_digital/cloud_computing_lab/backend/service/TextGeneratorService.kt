@@ -1,94 +1,105 @@
 package space.davids_digital.cloud_computing_lab.backend.service
 
 import org.springframework.stereotype.Service
+import space.davids_digital.cloud_computing_lab.backend.model.MarkChainTransitionModel
+import space.davids_digital.cloud_computing_lab.backend.orm.entity.enum.AgentStatusEntityEnum
+import space.davids_digital.cloud_computing_lab.backend.orm.entity.mapping.toModel
+import space.davids_digital.cloud_computing_lab.backend.orm.repository.AgentRepository
 import space.davids_digital.cloud_computing_lab.backend.orm.repository.MarkChainTransitionRepository
-import space.davids_digital.cloud_computing_lab.tokenizer.Tokenizer
-import space.davids_digital.cloud_computing_lab.tokenizer.isTerminator
-import space.davids_digital.cloud_computing_lab.tokenizer.isWord
-import java.util.regex.Pattern
-import java.util.stream.Collectors
-import kotlin.random.Random
+import space.davids_digital.cloud_computing_lab.tokenizer.Tokenizer.isTerminator
+import space.davids_digital.cloud_computing_lab.tokenizer.Tokenizer.isWord
+import java.util.*
+
+private const val MIN_WORDS = 12
+private const val SOFT_MAX_WORDS = 24
+private const val HARD_MAX_WORDS = 36
 
 @Service
 class TextGeneratorService(
-    private val markChainRepo: MarkChainTransitionRepository
-){
-    /*
-        if styles is empty, that means that user chose all agents where sensitive == false
+    private val markChainTransitionRepository: MarkChainTransitionRepository,
+    private val agentRepository: AgentRepository
+) {
 
-        step 1: get needed agents
-        step 2: find a random word that goes after our word
-     */
-    //TODO: write this function
     fun generate(text: String, styles: List<Int>): String {
         val result = StringBuilder()
 
-        if (styles.isNotEmpty()) {
-            //TODO
+        val effectiveStyles = styles.ifEmpty {
+            agentRepository.findIdsBySensitiveAndStatusAndVisible(
+                false, AgentStatusEntityEnum.READY, true
+            )
         }
-        result.append(text)
 
-        // all chosen iterated things
-        val words = text.split(" ")
-        val allTransitions = markChainRepo.findAllByIdAgentId(styles).toList()
+        val transitions = mutableMapOf<String?, MutableList<MarkChainTransitionModel>>()
+        markChainTransitionRepository.findAllByAgentIds(effectiveStyles)
+            .map { it.toModel() }
+            .forEach { transitions.computeIfAbsent(it.beginning) { mutableListOf() }.add(it) }
 
-        //rng part
-        val genSeed = stringToSeed(words)
-        val rng = Random(genSeed)
-        ////
+        var wordsGenerated = 0
 
-        var shouldClose = false
-        var lastTerminator = "."
-        var word = words[words.size-1]
-        while (!shouldClose){
-            val currentWordTransitions = allTransitions.
-                parallelStream().filter { x -> x.beginning == word }.collect(Collectors.toList())
-            val howManyInChain: Long = currentWordTransitions.sumOf { x -> x.transitionCount }
+        while (true) {
+            val fullText = text + result.toString()
+            val lastWord = pickLastWord(fullText)?.lowercase(Locale.getDefault())
+            var newSentenceWord = fullText.isBlank() || fullText.substring(fullText.length).isTerminator()
 
-            var rVal = rng.nextDouble()
+            var currentTransitions = transitions[lastWord]
+            if (currentTransitions == null) {
+                currentTransitions = transitions[null] ?: return ""
+                result.append(".")
+                newSentenceWord = true
+            }
 
-            for (i in 0..currentWordTransitions.size){
-                rVal -= currentWordTransitions[i].transitionCount / howManyInChain
+            if (wordsGenerated < MIN_WORDS)
+                currentTransitions = currentTransitions.filter { it.continuation != null }.toMutableList()
 
-                if (rVal <= 0.0){
-                    val continuation = currentWordTransitions[i].continuation
-                    if (continuation == null){
-                        shouldClose = true
-                        result.append(lastTerminator)
+            val divider = currentTransitions.sumOf { it.transitionCount }
+
+            var rVal = Math.random()
+
+            for (i in 0 until currentTransitions.size) {
+                rVal -= currentTransitions[i].transitionCount.toDouble() / divider
+
+                if (rVal <= 0.0) {
+                    val continuation = currentTransitions[i].continuation
+                    if (continuation == null) {
+                        result.append(".")
+
+                        if (wordsGenerated > SOFT_MAX_WORDS)
+                            break
+
                     } else {
-                        result.append(continuation)
-                        word = pickWord(continuation)
-                        lastTerminator = pickTerminator(continuation)
-                    }
+                        if (result.isNotEmpty() && !pickLastWord(continuation).isTerminator())
+                            result.append(" ")
 
+                        result.append(
+                            if (newSentenceWord)
+                                firstCharUpperCase(continuation)
+                            else
+                                continuation
+                        )
+                    }
+                    break
                 }
             }
+
+            wordsGenerated++
+            if (wordsGenerated > HARD_MAX_WORDS)
+                break
         }
+
         return result.toString()
     }
 
-    private fun pickTerminator(words:String):String{
-        val tokens = Tokenizer.tokenize(words)
-        for (i in tokens.size-1..0){
-            val last = tokens[i]
-            if (last.isTerminator()) return last
-        }
-        return ""
+    private fun firstCharUpperCase(text: String): String {
+        if (text.isBlank())
+            return text
+        return text.substring(0, 1).uppercase(Locale.getDefault()) + text.substring(1)
     }
 
-    private fun pickWord(words: String):String {
-        val tokens = Tokenizer.tokenize(words)
-        for (i in tokens.size-1..0){
-            val last = tokens[i]
-            if (last.isWord()) return last
-        }
-        return ""
-    }
-
-
-    fun stringToSeed(s: List<String>):Long {
-        var hash: Long = 0
-        hash = s.hashCode().toLong() //FIXME:  change this to something other
-        return hash
+    private fun pickLastWord(text: String): String? {
+        if (text.indexOf(" ") != -1)
+            return text.substringAfterLast(" ")
+        if (text.isNotBlank())
+            return text
+        return null
     }
 }

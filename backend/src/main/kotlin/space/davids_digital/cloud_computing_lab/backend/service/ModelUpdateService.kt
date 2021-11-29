@@ -40,6 +40,8 @@ class ModelUpdateService(
                     lastAppliedDataEntry = end
                 )
             )
+
+            logger.info("Chain model of agent id {} updated (last applied data id is {})", agentId, end)
         }
     }
 }

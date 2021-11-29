@@ -5,6 +5,7 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.AgentEntity
+import space.davids_digital.cloud_computing_lab.backend.orm.entity.enum.AgentStatusEntityEnum
 import javax.transaction.Transactional
 
 @Repository
@@ -19,4 +20,7 @@ interface AgentRepository: CrudRepository<AgentEntity, Int> {
 
     @Query("select lastAppliedDataEntry from agent where id = :id")
     fun getAgentLastAppliedDataEntryId(@Param("id") id: Int): Long?
+
+    @Query("select id from agent where sensitive = :sensitive and status = :status and visible = :visible")
+    fun findIdsBySensitiveAndStatusAndVisible(sensitive: Boolean, status: AgentStatusEntityEnum, visible: Boolean): List<Int>
 }

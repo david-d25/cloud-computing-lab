@@ -4,15 +4,15 @@ import java.lang.StringBuilder
 import java.util.*
 import java.util.regex.Pattern
 
-fun String?.isTerminator() = this?.matches(Regex("[.?!]+")) ?: false
-fun String?.isWord() = this != null && this.matches(Regex("[()\\p{L}+*<>{}\\[\\]!@#\$%^&\"'`~-]+|\\d+"))
-
 object Tokenizer {
     data class Transition (
         val beginning: String?,
         val continuation: String?,
         var count: Int
     )
+
+    fun String?.isTerminator() = this?.matches(Regex("[.?!]+")) ?: false
+    fun String?.isWord() = this != null && this.matches(Regex("[()\\p{L}+*<>{}\\[\\]!@#\$%^&\"'`~-]+|\\d+"))
 
     fun generateTransitions(text: String, maxWordsPerTransition: Int): Set<Transition> {
         val tokens = tokenize(text)
@@ -62,10 +62,15 @@ object Tokenizer {
 
         var i = -1
         while (i < tokens.size) {
-            val beginning = getToken(i)?.lowercase(Locale.getDefault())
+            var beginning = getToken(i)?.lowercase(Locale.getDefault())
             if (beginning.isTerminator()) {
                 i++
                 continue
+            }
+
+            while (getToken(i + 1) != null && !getToken(i + 1).isWord()) {
+                i++
+                beginning += getToken(i)
             }
 
             val wordsAvailable = wordsAvailableInSentence(i + 1, maxWordsPerTransition)
@@ -76,12 +81,16 @@ object Tokenizer {
                 } else if (wordsToUse == 1 && wordsAvailable == 0)
                     result.putTransition(beginning, null)
             }
+
             i++
+
+            while (getToken(i) != null && !getToken(i).isWord())
+                i++
         }
         return result.values.toSet()
     }
 
-    fun tokenize(text: String): List<String> {
+    private fun tokenize(text: String): List<String> {
         val result = mutableListOf<String>()
         val pattern = Pattern.compile("[\\p{L}-]+|\\d+|\\S+")
         val matcher = pattern.matcher(text)

@@ -43,5 +43,6 @@ class EntityBasedAgentContext(
 
     override fun clearData() {
         entity.data.clear()
+        entity.lastAppliedDataEntry = null
     }
 }
