@@ -1,7 +1,11 @@
 package space.davids_digital.cloud_computing_lab.tokenizer
 
 import java.lang.StringBuilder
+import java.util.*
 import java.util.regex.Pattern
+
+fun String?.isTerminator() = this?.matches(Regex("[.?!]+")) ?: false
+fun String?.isWord() = this != null && this.matches(Regex("[()\\p{L}+*<>{}\\[\\]!@#\$%^&\"'`~-]+|\\d+"))
 
 object Tokenizer {
     data class Transition (
@@ -9,9 +13,6 @@ object Tokenizer {
         val continuation: String?,
         var count: Int
     )
-
-    private fun String?.isTerminator() = this?.matches(Regex("[.?!]+")) ?: false
-    private fun String?.isWord() = this != null && this.matches(Regex("[()\\p{L}+*<>{}\\[\\]!@#\$%^&\"'`~-]+|\\d+"))
 
     fun generateTransitions(text: String, maxWordsPerTransition: Int): Set<Transition> {
         val tokens = tokenize(text)
@@ -61,7 +62,7 @@ object Tokenizer {
 
         var i = -1
         while (i < tokens.size) {
-            val beginning = getToken(i)
+            val beginning = getToken(i)?.lowercase(Locale.getDefault())
             if (beginning.isTerminator()) {
                 i++
                 continue
@@ -80,7 +81,7 @@ object Tokenizer {
         return result.values.toSet()
     }
 
-    private fun tokenize(text: String): List<String> {
+    fun tokenize(text: String): List<String> {
         val result = mutableListOf<String>()
         val pattern = Pattern.compile("[\\p{L}-]+|\\d+|\\S+")
         val matcher = pattern.matcher(text)

@@ -21,20 +21,24 @@ class LocalModelControlService(
         val agent = agentRepository.findById(agentId).orElseThrow { ServiceException("Agent id $agentId not found") }
         val data = agent.data[dataId] ?: throw ServiceException("Data id $dataId not found in agent id $agentId")
 
-        Tokenizer.generateTransitions(data, DEFAULT_MAX_WORDS_PER_TRANSITION).forEach {
-            val transitionEntity = markChainTransitionRepository.findByBeginningAndContinuation(
-                it.beginning, it.continuation
-            ).orElse(
-                MarkChainTransitionEntity(
-                    agentId = agentId,
-                    entryId = (markChainTransitionRepository.getMaxEntryIdByAgentId(agentId) ?: - 1) + 1,
-                    beginning = it.beginning,
-                    continuation = it.continuation,
-                    transitionCount = 0
-                )
-            )
-            transitionEntity.transitionCount += it.count
-            markChainTransitionRepository.save(transitionEntity)
-        }
+        var entryIdCount = (markChainTransitionRepository.getMaxEntryIdByAgentId(agentId) ?: - 1) + 1
+        markChainTransitionRepository.saveAll(
+            Tokenizer.generateTransitions(data, DEFAULT_MAX_WORDS_PER_TRANSITION).map { transition ->
+                markChainTransitionRepository.findByBeginningAndContinuation(
+                    transition.beginning, transition.continuation
+                ).orElse(
+                    MarkChainTransitionEntity(
+                        agentId = agentId,
+                        entryId = entryIdCount,
+                        beginning = transition.beginning,
+                        continuation = transition.continuation,
+                        transitionCount = 0
+                    )
+                ).also { entity ->
+                    entity.transitionCount += transition.count
+                    entryIdCount++
+                }
+            }
+        )
     }
 }
