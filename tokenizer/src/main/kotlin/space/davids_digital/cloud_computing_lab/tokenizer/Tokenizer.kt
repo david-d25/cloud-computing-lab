@@ -60,39 +60,41 @@ object Tokenizer {
             return buffer.toString()
         }
 
-        var i = -1
-        while (i < tokens.size) {
-            var beginning = getToken(i)?.lowercase(Locale.getDefault())
+        var currentTokenIndex = -1
+        while (currentTokenIndex < tokens.size) {
+            var beginning = getToken(currentTokenIndex)?.lowercase(Locale.getDefault())
             if (beginning.isTerminator()) {
-                i++
+                currentTokenIndex++
                 continue
             }
 
-            while (getToken(i + 1) != null && !getToken(i + 1).isWord()) {
-                i++
-                beginning += getToken(i)
+            if (beginning != null) {
+                while (getToken(currentTokenIndex + 1) != null && !getToken(currentTokenIndex + 1).isWord()) {
+                    currentTokenIndex++
+                    beginning += getToken(currentTokenIndex)
+                }
             }
 
-            val wordsAvailable = wordsAvailableInSentence(i + 1, maxWordsPerTransition)
+            val wordsAvailable = wordsAvailableInSentence(currentTokenIndex + 1, maxWordsPerTransition)
             repeat(maxWordsPerTransition) {
                 val wordsToUse = it + 1
                 if (wordsAvailable >= wordsToUse) {
-                    result.putTransition(beginning, grabNextNWords(i + 1, wordsToUse))
+                    result.putTransition(beginning, grabNextNWords(currentTokenIndex + 1, wordsToUse))
                 } else if (wordsToUse == 1 && wordsAvailable == 0)
                     result.putTransition(beginning, null)
             }
 
-            i++
+            currentTokenIndex++
 
-            while (getToken(i) != null && !getToken(i).isWord())
-                i++
+            while (getToken(currentTokenIndex) != null && !getToken(currentTokenIndex).isWord())
+                currentTokenIndex++
         }
         return result.values.toSet()
     }
 
     private fun tokenize(text: String): List<String> {
         val result = mutableListOf<String>()
-        val pattern = Pattern.compile("[\\p{L}-]+|\\d+|\\S+")
+        val pattern = Pattern.compile("(\\n\\s*)?([\\p{L}-]+|\\d+|\\S+)")
         val matcher = pattern.matcher(text)
         while (matcher.find())
             result.add(matcher.group())

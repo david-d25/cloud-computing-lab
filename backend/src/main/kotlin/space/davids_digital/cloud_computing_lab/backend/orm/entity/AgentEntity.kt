@@ -52,7 +52,7 @@ data class AgentEntity (
     @Column(name = "value", columnDefinition = "text")
     var memory: MutableMap<String, String> = mutableMapOf(),
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "agent_data", joinColumns = [
         JoinColumn(name = "agent_id", referencedColumnName = "id")
     ])

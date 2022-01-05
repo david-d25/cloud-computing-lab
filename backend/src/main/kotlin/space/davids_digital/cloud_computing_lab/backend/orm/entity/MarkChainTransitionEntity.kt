@@ -6,7 +6,7 @@ import javax.persistence.*
 
 @Entity(name = "mark_chain_transition")
 @Table(
-    uniqueConstraints = [UniqueConstraint(columnNames = ["beginning", "continuation"])]
+    uniqueConstraints = [UniqueConstraint(columnNames = ["agent_id", "beginning", "continuation"])]
 )
 @IdClass(MarkChainTransitionId::class)
 data class MarkChainTransitionEntity (

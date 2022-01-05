@@ -8,6 +8,9 @@ import space.davids_digital.cloud_computing_lab.backend.orm.repository.AgentRepo
 import space.davids_digital.cloud_computing_lab.backend.orm.repository.MarkChainTransitionRepository
 import space.davids_digital.cloud_computing_lab.backend.util.GlobalConstraints.DEFAULT_MAX_WORDS_PER_TRANSITION
 import space.davids_digital.cloud_computing_lab.tokenizer.Tokenizer
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.stream.Collectors
 
 @Service
 @Qualifier("local")
@@ -20,26 +23,29 @@ class LocalModelControlService(
         val agent = agentRepository.findById(agentId).orElseThrow { ServiceException("Agent id $agentId not found") }
         val data = agent.data[dataId] ?: throw ServiceException("Data id $dataId not found in agent id $agentId")
 
-        var entryIdCount = (markChainTransitionRepository.getMaxEntryIdByAgentId(agentId) ?: - 1) + 1
-        markChainTransitionRepository.saveAll(
-            Tokenizer.generateTransitions(data, DEFAULT_MAX_WORDS_PER_TRANSITION).filter {
-                (it.beginning == null || it.beginning!!.length < 255) && (it.continuation == null || it.continuation!!.length < 255)
-            }.map { transition ->
-                markChainTransitionRepository.findByBeginningAndContinuation(
-                    transition.beginning, transition.continuation
-                ).orElse(
+        val transitionEntities = ConcurrentHashMap(
+            markChainTransitionRepository.findAllByAgentIds(listOf(agentId))
+                .associateBy { Pair(it.beginning, it.continuation) }
+        )
+        val entryIdCount = AtomicInteger((markChainTransitionRepository.getMaxEntryIdByAgentId(agentId) ?: - 1) + 1)
+
+        Tokenizer.generateTransitions(data, DEFAULT_MAX_WORDS_PER_TRANSITION).parallelStream()
+            .filter {
+                (it.beginning == null || it.beginning!!.length < 255) && (it.continuation == null || it.continuation!!.length < 255) }
+            .forEach { transition ->
+                transitionEntities.computeIfAbsent(
+                    Pair(transition.beginning, transition.continuation)
+                ) {
                     MarkChainTransitionEntity(
                         agentId = agentId,
-                        entryId = entryIdCount,
+                        entryId = entryIdCount.getAndIncrement(),
                         beginning = transition.beginning,
                         continuation = transition.continuation,
                         transitionCount = 0
                     )
-                ).also { entity ->
-                    entity.transitionCount += transition.count
-                    entryIdCount++
-                }
+                }.transitionCount += transition.count
             }
-        )
+
+        markChainTransitionRepository.saveAll(transitionEntities.values)
     }
 }

@@ -1,18 +1,15 @@
 package space.davids_digital.cloud_computing_lab.backend.service
 
 import org.springframework.stereotype.Service
-import space.davids_digital.cloud_computing_lab.backend.model.MarkChainTransitionModel
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.enum.AgentStatusEntityEnum
-import space.davids_digital.cloud_computing_lab.backend.orm.entity.mapping.toModel
 import space.davids_digital.cloud_computing_lab.backend.orm.repository.AgentRepository
 import space.davids_digital.cloud_computing_lab.backend.orm.repository.MarkChainTransitionRepository
 import space.davids_digital.cloud_computing_lab.tokenizer.Tokenizer.isTerminator
-import space.davids_digital.cloud_computing_lab.tokenizer.Tokenizer.isWord
 import java.util.*
 
-private const val MIN_WORDS = 12
-private const val SOFT_MAX_WORDS = 24
-private const val HARD_MAX_WORDS = 36
+private const val MIN_WORDS = 2
+private const val SOFT_MAX_WORDS = 4
+private const val HARD_MAX_WORDS = 24
 
 @Service
 class TextGeneratorService(
@@ -29,11 +26,6 @@ class TextGeneratorService(
             )
         }
 
-        val transitions = mutableMapOf<String?, MutableList<MarkChainTransitionModel>>()
-        markChainTransitionRepository.findAllByAgentIds(effectiveStyles)
-            .map { it.toModel() }
-            .forEach { transitions.computeIfAbsent(it.beginning) { mutableListOf() }.add(it) }
-
         var wordsGenerated = 0
 
         while (true) {
@@ -41,10 +33,14 @@ class TextGeneratorService(
             val lastWord = pickLastWord(fullText)?.lowercase(Locale.getDefault())
             var newSentenceWord = fullText.isBlank() || fullText.substring(fullText.length).isTerminator()
 
-            var currentTransitions = transitions[lastWord]
-            if (currentTransitions == null) {
-                currentTransitions = transitions[null] ?: return ""
-                result.append(".")
+            if (newSentenceWord && wordsGenerated > SOFT_MAX_WORDS)
+                break
+
+            var currentTransitions = markChainTransitionRepository.findAllByAgentIdsAndBeginning(effectiveStyles, lastWord)
+            if (currentTransitions.isEmpty()) {
+                currentTransitions = markChainTransitionRepository.findAllByAgentIdsAndBeginningIsNull(effectiveStyles)
+                if (result.isNotBlank())
+                    result.append(".")
                 newSentenceWord = true
             }
 
@@ -55,19 +51,15 @@ class TextGeneratorService(
 
             var rVal = Math.random()
 
-            for (i in 0 until currentTransitions.size) {
+            for (i in currentTransitions.indices) {
                 rVal -= currentTransitions[i].transitionCount.toDouble() / divider
 
                 if (rVal <= 0.0) {
                     val continuation = currentTransitions[i].continuation
                     if (continuation == null) {
                         result.append(".")
-
-                        if (wordsGenerated > SOFT_MAX_WORDS)
-                            break
-
                     } else {
-                        if (result.isNotEmpty() && !pickLastWord(continuation).isTerminator())
+                        if (fullText.isNotEmpty() && !pickLastWord(continuation).isTerminator())
                             result.append(" ")
 
                         result.append(
@@ -96,8 +88,8 @@ class TextGeneratorService(
     }
 
     private fun pickLastWord(text: String): String? {
-        if (text.indexOf(" ") != -1)
-            return text.substringAfterLast(" ")
+        if (text.trim().indexOf(" ") != -1)
+            return text.trim().substringAfterLast(" ")
         if (text.isNotBlank())
             return text
         return null

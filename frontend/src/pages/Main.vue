@@ -16,7 +16,7 @@
 
       <div class="text_generation" v-else>
         <loading-content :status="generateStatus" @reload="generateStatus = 'ready'">
-          <textarea class="textarea" placeholder="Введите текст сюда" v-model="text"></textarea>
+          <textarea class="textarea" placeholder="Введите текст сюда" v-model="text" @keydown.ctrl.enter="generate"></textarea>
         </loading-content>
         <div class="styles_hint">
           <span v-if="selectedStyles.length">
