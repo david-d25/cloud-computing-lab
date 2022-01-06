@@ -1,5 +1,7 @@
 package space.davids_digital.cloud_computing_lab.backend.orm.entity
 
+import org.hibernate.annotations.NotFound
+import org.springframework.data.annotation.Reference
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.id.MarkChainTransitionId
 import java.io.Serializable
 import javax.persistence.*
@@ -25,5 +27,5 @@ data class MarkChainTransitionEntity (
     var continuation: String? = null,
 
     @Column(name = "transition_count", nullable = false)
-    var transitionCount: Long = 0
+    var transitionCount: Long = 0,
 ): Serializable

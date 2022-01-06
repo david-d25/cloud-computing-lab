@@ -58,5 +58,9 @@ data class AgentEntity (
     ])
     @MapKeyColumn(name = "key")
     @Column(name = "value", columnDefinition = "text")
-    var data: MutableMap<Long, String> = mutableMapOf()
+    var data: MutableMap<Long, String> = mutableMapOf(),
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
+    @Column(name = "value", columnDefinition = "text")
+    var transitions: MutableSet<MarkChainTransitionEntity> = mutableSetOf()
 )

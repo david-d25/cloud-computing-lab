@@ -173,7 +173,7 @@ export default {
     },
 
     startUpdater() {
-      this.updaterIntervalId = setTimeout(this.backgroundUpdate, 5000)
+      this.updaterIntervalId = setTimeout(this.backgroundUpdate, 3000)
     },
 
     async backgroundUpdate() {
@@ -196,7 +196,7 @@ export default {
       } catch (e) {
         console.error(e);
       } finally {
-        this.updaterIntervalId = setTimeout(this.backgroundUpdate, 5000)
+        this.updaterIntervalId = setTimeout(this.backgroundUpdate, 3000)
       }
     },
 
