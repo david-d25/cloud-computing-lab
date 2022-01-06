@@ -10,7 +10,7 @@ import space.davids_digital.cloud_computing_lab.agent.exception.AgentExecutionEx
 @AgentExecutorParameter("Текст", "data", STRING,true)
 class ParameterValueAgentExecutor(context: AgentContext) : AbstractAgentExecutor(context) {
     companion object {
-        private const val MAX_CHUNK_SIZE = 65536
+        private const val MAX_CHUNK_SIZE = 16384
     }
 
     override fun execute() {
