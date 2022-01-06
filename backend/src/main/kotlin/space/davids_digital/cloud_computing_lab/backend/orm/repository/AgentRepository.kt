@@ -20,6 +20,9 @@ interface AgentRepository: CrudRepository<AgentEntity, Int> {
     @Query("select max(size(data)) from agent a join a.data data where a.id = :id")
     fun getAgentDataEntriesSize(@Param("id") id: Int): Long
 
+    @Query("select max(key) from agent_data where agent_id = :id", nativeQuery = true)
+    fun getAgentMaxDataEntryId(@Param("id") id: Int): Long?
+
     @Query("select lastAppliedDataEntry from agent where id = :id")
     fun getAgentLastAppliedDataEntryId(@Param("id") id: Int): Long?
 
@@ -32,8 +35,11 @@ interface AgentRepository: CrudRepository<AgentEntity, Int> {
     @Query("select value(a.memory) from agent a join a.memory m where a.id = :id and :key = key(m)")
     fun getMemoryByKey(@Param("id") id: Int, @Param("key") key: String): String?
 
+    @Query("select value from agent_data where agent_id = :id and key = :key", nativeQuery = true)
+    fun getDataByKey(@Param("id") id: Int, @Param("key") key: Long): String?
+
     @Modifying
-    @Query("insert into agent_memory (agent_id, value, key) values (:id, :value, :key) on conflict do update set key = :key", nativeQuery = true)
+    @Query("insert into agent_memory (agent_id, value, key) values (:id, :value, :key) on conflict (key) do update set value = :value", nativeQuery = true)
     fun setMemoryByKey(@Param("id") id: Int, @Param("key") key: String, @Param("value") value: String)
 
     @Modifying

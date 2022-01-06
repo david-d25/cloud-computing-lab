@@ -1,5 +1,6 @@
 package space.davids_digital.cloud_computing_lab.backend.orm.repository
 
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
@@ -16,6 +17,10 @@ interface MarkChainTransitionRepository: CrudRepository<MarkChainTransitionEntit
 
     @Query("select max(entryId) from mark_chain_transition where agentId = :id")
     fun getMaxEntryIdByAgentId(id: Int): Int?
+
+    @Modifying
+    @Query("insert into mark_chain_transition (agent_id, entry_id, beginning, continuation, transition_count) values (:agentId, (select coalesce(max(entry_id), -1) + 1 from mark_chain_transition where agent_id = :agentId), :beginning, :continuation, :count) on conflict (agent_id, beginning, continuation) do update set transition_count = excluded.transition_count + :count", nativeQuery = true)
+    fun applyNewTransition(agentId: Int, beginning: String?, continuation: String?, count: Long)
 
     @Query("from mark_chain_transition where agentId in :ids")
     fun findAllByAgentIds(ids: Iterable<Int>): Iterable<MarkChainTransitionEntity>

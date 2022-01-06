@@ -13,15 +13,15 @@ import javax.transaction.Transactional
 class ModelUpdateService(
     @Qualifier("local")
     private val modelControlService: ModelControlService,
-    private val agentService: AgentService,
-    private val transactionManager: PlatformTransactionManager
+    private val agentService: AgentService
 ) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     @Scheduled(fixedDelay = MODEL_UPDATE_DELAY_MS)
     fun updateModels() {
         val updatableAgents = agentService.getAgentNeedingModelUpdateIds()
-        for (agentId in updatableAgents) {
+        if (updatableAgents.isNotEmpty()) {
+            val agentId = updatableAgents.random();
             val entriesSize = agentService.getAgentDataEntriesSize(agentId)
             val lastApplied = agentService.getAgentLastAppliedDataEntryId(agentId)
             val start = (lastApplied ?: -1) + 1
@@ -33,16 +33,8 @@ class ModelUpdateService(
             )
 
             for (dataId in start .. end) {
-                val status = transactionManager.getTransaction(null)
                 logger.info("Updating chain model of agent id {}: applying data id {}/{}", agentId, dataId, end)
                 modelControlService.applyDataset(agentId, dataId)
-                agentService.editAgent(
-                    EditAgentRequestModel(
-                        id = agentId,
-                        lastAppliedDataEntry = dataId
-                    )
-                )
-                transactionManager.commit(status)
             }
 
             logger.info("Chain model of agent id {} updated (last applied data id is {})", agentId, end)

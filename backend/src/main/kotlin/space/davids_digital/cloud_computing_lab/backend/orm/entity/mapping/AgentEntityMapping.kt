@@ -4,9 +4,10 @@ import space.davids_digital.cloud_computing_lab.backend.model.AgentModel
 import space.davids_digital.cloud_computing_lab.backend.model.AgentStatusModel
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.AgentEntity
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.enum.AgentStatusEntityEnum
+import space.davids_digital.cloud_computing_lab.backend.orm.repository.AgentRepository
 import java.sql.Timestamp
 
-fun AgentEntity.toModel() = AgentModel(
+fun AgentEntity.toModel(repository: AgentRepository) = AgentModel(
     id = id!!,
     type = type!!,
     name = name!!,
@@ -19,6 +20,7 @@ fun AgentEntity.toModel() = AgentModel(
     },
     updatePeriodSeconds = updatePeriodSeconds,
     lastAppliedDataEntry = lastAppliedDataEntry,
+    lastDataEntry = repository.getAgentMaxDataEntryId(id!!),
     visible = visible!!,
     lastUpdateTimestamp = lastUpdateTimestamp?.toInstant(),
     sensitive = sensitive!!,

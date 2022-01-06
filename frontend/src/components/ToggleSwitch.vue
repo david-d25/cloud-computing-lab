@@ -90,8 +90,6 @@ export default {
   }
 
   input:checked + .slider:before {
-    -webkit-transform: translateX(26px);
-    -ms-transform: translateX(26px);
     transform: translateX(26px);
   }
 </style>

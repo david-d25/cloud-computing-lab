@@ -11,6 +11,8 @@ data class AgentResponseManageDto(
     var visible: Boolean? = null,
     var updatePeriodSeconds: Long? = null,
     var lastUpdateTimestamp: Instant? = null,
+    var lastAppliedDataEntryId: Long? = null,
+    var lastDataEntryId: Long? = null,
     var sensitive: Boolean? = null,
     var parameters: Map<String, String> = mapOf(),
     var memory: Map<String, String> = mapOf()

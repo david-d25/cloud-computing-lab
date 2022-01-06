@@ -36,6 +36,14 @@ a {
   --just-a-little-red: #F4EAEA;
   --red-background: #2c0000;
 
+  // Filters for changing SVG color
+  // https://codepen.io/sosuke/pen/Pjoqqp
+  --text-color--svg-filter: invert(0%) sepia(34%) saturate(0%) hue-rotate(359deg) brightness(99%) contrast(102%);
+  --black--svg-filter: invert(0%) sepia(34%) saturate(0%) hue-rotate(359deg) brightness(99%) contrast(102%);
+  --fill--svg-filter: invert(76%) sepia(44%) saturate(2742%) hue-rotate(199deg) brightness(104%) contrast(101%);
+  --stroke--svg-filter: invert(26%) sepia(77%) saturate(2148%) hue-rotate(237deg) brightness(102%) contrast(104%);
+  --dark-grey--svg-filter: invert(61%) sepia(1%) saturate(0%) hue-rotate(141deg) brightness(88%) contrast(90%);
+
   --default-transition: border-color 300ms ease-in-out,
                         color 300ms ease-in-out,
                         background-color 300ms ease-in-out,
@@ -51,8 +59,14 @@ a {
   --background: #101010;
   --grey: #646464;
   --light-grey: #202020;
-  --dark-grey: #888888;
   --just-a-little-red: #5e4f4f;
+
+  // Filters for changing SVG color
+  // https://codepen.io/sosuke/pen/Pjoqqp
+  --text-color--svg-filter: invert(100%) sepia(96%) saturate(0%) hue-rotate(108deg) brightness(106%) contrast(104%);
+  --black--svg-filter: invert(100%) sepia(96%) saturate(0%) hue-rotate(108deg) brightness(106%) contrast(104%);
+  --fill--svg-filter: invert(66%) sepia(78%) saturate(2716%) hue-rotate(208deg) brightness(99%) contrast(105%);
+  --stroke--svg-filter: invert(36%) sepia(73%) saturate(6118%) hue-rotate(242deg) brightness(101%) contrast(101%);
 }
 
 @import "credits";

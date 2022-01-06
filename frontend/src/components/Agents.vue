@@ -15,10 +15,43 @@
             <transition-expand>
               <div class="body_wr" v-if="agent.expanded">
                 <div class="body">
-                  <div>id {{agent.id}}</div>
-                  <div>Тип: {{agent.type}}</div>
-                  <div>Последний запуск: {{agent.lastUpdateTimestamp}}</div>
-                  <div>Период обновления: {{agent.updatePeriodSeconds}}</div>
+                  <div class="top_row">
+                    <div class="info id_info">
+                      <span class="info_name">ID: </span>
+                      <span class="info_value">{{agent.id}}</span>
+                    </div>
+                    <div class="info type_info">
+                      <span class="info_name">Тип: </span>
+                      <span class="info_value">{{getUserFriendlyAgentTypeName(agent.type)}}</span>
+                    </div>
+                    <div class="info last_run_info" v-if="agent.lastUpdateTimestamp">
+                      <span class="info_name">Последний запуск: </span>
+                      <span class="info_value">{{getUserFriendlyDate(agent.lastUpdateTimestamp)}}</span>
+                    </div>
+                    <div class="info last_run_info" v-else>
+                      <span class="info_name">Еще не запускался</span>
+                    </div>
+                  </div>
+                  <div class="info update_period_info" v-if="agent.updatePeriodSeconds > 0">
+                    <div class="info_icon">
+                      <img src="assets/icons/update_period.svg" alt="icon">
+                    </div>
+                    <span class="info_name">Обновляется каждые </span>
+                    <span class="info_value">{{agent.updatePeriodSeconds}}</span>
+                    <span class="info_name"> секунд</span>
+                  </div>
+                  <transition-expand>
+                    <div class="info incomplete_model_info" v-if="agent.lastAppliedDataEntryId !== agent.lastDataEntryId">
+                      <div class="info_icon">
+                        <img src="assets/icons/info.svg" alt="icon">
+                      </div>
+                      <span class="info_name">Ожидает обновления модели (</span>
+                      <span class="info_value">{{(agent.lastDataEntryId === null ? -1 : agent.lastDataEntryId) - (agent.lastAppliedDataEntryId === null ? -1 : agent.lastAppliedDataEntryId)}} </span>
+                      <span class="info_name">блоков из </span>
+                      <span class="info_value">{{(agent.lastDataEntryId || 0) + 1}}</span>
+                      <span class="info_name">)</span>
+                    </div>
+                  </transition-expand>
                 </div>
               </div>
             </transition-expand>
@@ -118,11 +151,13 @@ export default {
         visible: { value: true },
         sensitive: { value: false },
         parameters: {}
-      }
+      },
+      updaterIntervalId: null
     }
   },
   mounted() {
     this.reloadAgents();
+    this.startUpdater();
   },
   methods: {
     async reloadAgents() {
@@ -134,6 +169,34 @@ export default {
         this.agentsStatus = "ready";
       } catch (e) {
         this.agentsStatus = e.request.status === 0 ? 'offline' : 'error';
+      }
+    },
+
+    startUpdater() {
+      this.updaterIntervalId = setTimeout(this.backgroundUpdate, 5000)
+    },
+
+    async backgroundUpdate() {
+      try {
+        if (this.agentsStatus === 'ready') {
+          let newAgents = (await axios.get('/api/manage/agent')).data.reduce((map, obj) => {
+            map[obj.id] = obj;
+            return map;
+          }, {});
+          for (let i = 0; i < this.agents.length; i++) {
+            if (this.agents[i].id in newAgents) {
+              let newAgent = newAgents[this.agents[i].id];
+              Vue.set(this.agents, i, {...this.agents[i], ...newAgent});
+            } else {
+              this.agents.splice(i, 1);
+              i--;
+            }
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        this.updaterIntervalId = setTimeout(this.backgroundUpdate, 5000)
       }
     },
 
@@ -171,6 +234,15 @@ export default {
       this.newAgentForm.visible.value = true;
       this.newAgentForm.sensitive.value = false;
       this.newAgentForm.parameters = {};
+    },
+
+    getUserFriendlyAgentTypeName(type) {
+      return this.agentTypes.find(t => t.type === type).title
+    },
+
+    getUserFriendlyDate(timestamp) {
+      let date = new Date(timestamp*1000);
+      return `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()} ${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
     },
 
     async createAgent() {
@@ -327,10 +399,69 @@ export default {
     }
 
     .body {
+      text-align: left;
       font-size: 18px;
       padding: 15px;
       overflow: auto;
       border-top: 1px solid var(--grey);
+    }
+
+    .info_icon {
+      display: inline-block;
+      height: 30px;
+      width: 30px;
+      position: absolute;
+      left: 10px;
+      top: 0;
+      bottom: 0;
+      margin: auto;
+      filter: var(--dark-grey--svg-filter);
+
+      & img {
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    .top_row {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+    }
+
+    .info {
+      margin: 5px;
+
+      .info_name {
+        color: var(--grey)
+      }
+    }
+
+    .update_period_info {
+      background: var(--light-grey);
+      border-radius: 5px;
+      margin-top: 15px;
+      position: relative;
+      padding: 15px 15px 15px 50px;
+
+      .info_name {
+        color: var(--dark-grey);
+      }
+    }
+
+    .incomplete_model_info {
+      background: var(--light-grey);
+      border-radius: 5px;
+      margin-top: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      position: relative;
+      white-space: pre-wrap;
+      padding: 15px 15px 15px 50px;
+
+      .info_name {
+        color: var(--dark-grey);
+      }
     }
 
     .agent_arrow_sign {
