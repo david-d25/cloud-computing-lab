@@ -45,7 +45,7 @@ class AgentService @Autowired constructor(
     @Scheduled(fixedDelay = AGENT_SCHEDULED_EXECUTION_CHECK_DELAY_MS)
     fun checkAgentsRunSchedule() {
         getAgents().forEach {
-            if (it.updatePeriodSeconds != null && it.updatePeriodSeconds > 0) {
+            if ((it.status == AgentStatusModel.READY || it.status == AgentStatusModel.UNINITIALIZED) && it.updatePeriodSeconds != null && it.updatePeriodSeconds > 0) {
                 if (it.lastUpdateTimestamp == null || (Instant.now().toEpochMilli() - it.lastUpdateTimestamp.toEpochMilli())/1000 > it.updatePeriodSeconds) {
                     runAgent(it.id)
                 }

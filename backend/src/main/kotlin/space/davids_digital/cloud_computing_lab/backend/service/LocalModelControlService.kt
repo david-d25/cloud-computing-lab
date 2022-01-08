@@ -3,15 +3,10 @@ package space.davids_digital.cloud_computing_lab.backend.service
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
-import org.springframework.transaction.annotation.Transactional
-import space.davids_digital.cloud_computing_lab.backend.orm.entity.MarkChainTransitionEntity
 import space.davids_digital.cloud_computing_lab.backend.orm.repository.AgentRepository
 import space.davids_digital.cloud_computing_lab.backend.orm.repository.MarkChainTransitionRepository
-import space.davids_digital.cloud_computing_lab.backend.util.GlobalConstraints.DEFAULT_MAX_WORDS_PER_TRANSITION
 import space.davids_digital.cloud_computing_lab.tokenizer.Tokenizer
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.stream.Collectors
+import kotlin.math.floor
 
 @Service
 @Qualifier("local")
@@ -24,7 +19,7 @@ class LocalModelControlService(
     override fun applyDataset(agentId: Int, dataId: Long) {
         val data = agentRepository.getDataByKey(agentId, dataId) ?: throw ServiceException("Data id $dataId not found in agent id $agentId")
 
-        val transitions = Tokenizer.generateTransitions(data, DEFAULT_MAX_WORDS_PER_TRANSITION)
+        val transitions = Tokenizer.generateTransitions(data, floor(markChainTransitionRepository.getRecommendedMaxWordsPerTransition(agentId)).toInt())
 
         val status = transactionManager.getTransaction(null)
         try {
@@ -32,12 +27,10 @@ class LocalModelControlService(
                 .filter {
                     (it.beginning == null || it.beginning!!.length < 255) && (it.continuation == null || it.continuation!!.length < 255) }
                 .forEach {
-                    markChainTransitionRepository.applyNewTransition(
-                        agentId,
-                        it.beginning,
-                        it.continuation,
-                        it.count.toLong()
-                    )
+                    if (markChainTransitionRepository.existsByAgentIdAndBeginningAndContinuation(agentId, it.beginning, it.continuation))
+                        markChainTransitionRepository.updateExistingTransition(agentId, it.beginning, it.continuation, it.count.toLong())
+                    else
+                        markChainTransitionRepository.putNewTransition(agentId, it.beginning, it.continuation, it.count.toLong())
                 }
 
             agentRepository.findById(agentId).ifPresent {

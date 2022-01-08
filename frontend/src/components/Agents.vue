@@ -10,7 +10,14 @@
             <div class="head" @click="agent.expanded = !agent.expanded">
               <div class="agent_arrow_sign"></div>
               <div class="agent_name">{{agent.name}}</div>
-              <div class="agent_status">{{friendlyStatus(agent.status)}}</div>
+              <div class="agent_icons">
+                <div class="head_icon" v-if="agent.updatePeriodSeconds > 0">
+                  <img src="assets/icons/update_period.svg" alt="icon">
+                </div>
+              </div>
+              <div class="agent_status">
+                {{friendlyStatus(agent.status)}}
+              </div>
             </div>
             <transition-expand>
               <div class="body_wr" v-if="agent.expanded">
@@ -396,13 +403,30 @@ export default {
       padding: 20px;
 
       .agent_name {
-        flex: 1;
+        flex: 0;
+        white-space: nowrap;
+        margin-right: 15px;
         text-align: left;
       }
 
       .agent_status {
         font-size: 18px;
         color: var(--dark-grey);
+      }
+
+      .agent_icons {
+        flex: 1;
+      }
+      
+      .head_icon {
+        width: 30px;
+        height: 30px;
+        filter: var(--dark-grey--svg-filter);
+
+        & img {
+          width: 100%;
+          height: 100%;
+        }
       }
     }
 

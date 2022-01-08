@@ -8,8 +8,8 @@ import space.davids_digital.cloud_computing_lab.tokenizer.Tokenizer.isTerminator
 import java.util.*
 
 private const val MIN_WORDS = 2
-private const val SOFT_MAX_WORDS = 4
-private const val HARD_MAX_WORDS = 24
+private const val SOFT_MAX_WORDS = 10
+private const val HARD_MAX_WORDS = 28
 
 @Service
 class TextGeneratorService(
@@ -27,20 +27,20 @@ class TextGeneratorService(
         }
 
         var wordsGenerated = 0
+        var newSentenceWord = text.isBlank()
 
         while (true) {
             val fullText = text + result.toString()
             val lastWord = pickLastWord(fullText)?.lowercase(Locale.getDefault())
-            var newSentenceWord = fullText.isBlank() || fullText.substring(fullText.length).isTerminator()
-
-            if (newSentenceWord && wordsGenerated > SOFT_MAX_WORDS)
-                break
 
             var currentTransitions = markChainTransitionRepository.findAllByAgentIdsAndBeginning(effectiveStyles, lastWord)
             if (currentTransitions.isEmpty()) {
                 currentTransitions = markChainTransitionRepository.findAllByAgentIdsAndBeginningIsNull(effectiveStyles)
-                if (result.isNotBlank())
+                if (result.isNotBlank() && !result.endsWith(".")) {
                     result.append(".")
+                    if (wordsGenerated > SOFT_MAX_WORDS)
+                        break
+                }
                 newSentenceWord = true
             }
 
@@ -51,13 +51,16 @@ class TextGeneratorService(
 
             var rVal = Math.random()
 
+            var newWordsAdded = 1;
             for (i in currentTransitions.indices) {
                 rVal -= currentTransitions[i].transitionCount.toDouble() / divider
 
                 if (rVal <= 0.0) {
                     val continuation = currentTransitions[i].continuation
                     if (continuation == null) {
-                        result.append(".")
+                        if (!result.endsWith("."))
+                            result.append(".")
+                        newSentenceWord = true
                     } else {
                         if (fullText.isNotEmpty() && !pickLastWord(continuation).isTerminator())
                             result.append(" ")
@@ -68,13 +71,16 @@ class TextGeneratorService(
                             else
                                 continuation
                         )
+
+                        newWordsAdded = continuation.split(" ").size
+                        newSentenceWord = false
                     }
                     break
                 }
             }
 
-            wordsGenerated++
-            if (wordsGenerated > HARD_MAX_WORDS)
+            wordsGenerated += newWordsAdded
+            if (newSentenceWord && wordsGenerated > SOFT_MAX_WORDS || wordsGenerated > HARD_MAX_WORDS)
                 break
         }
 

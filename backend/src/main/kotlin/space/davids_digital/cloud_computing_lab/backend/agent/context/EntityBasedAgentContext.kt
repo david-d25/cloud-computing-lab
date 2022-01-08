@@ -5,6 +5,7 @@ import space.davids_digital.cloud_computing_lab.agent.context.AgentContext
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.AgentEntity
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.enum.AgentStatusEntityEnum
 
+@Deprecated("говнина")
 class EntityBasedAgentContext(
     val entity: AgentEntity
 ): AgentContext() {

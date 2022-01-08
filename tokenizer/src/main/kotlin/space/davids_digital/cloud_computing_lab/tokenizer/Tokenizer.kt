@@ -96,7 +96,7 @@ object Tokenizer {
         val result = mutableListOf<String>()
         val pattern = Pattern.compile("(\\n\\s*)?([\\p{L}-]+|\\d+|\\S+)")
         val matcher = pattern.matcher(text)
-        while (matcher.find())
+        while (matcher.find() && matcher.group().isNotBlank())
             result.add(matcher.group())
         return result
     }

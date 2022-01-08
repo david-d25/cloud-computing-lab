@@ -20,8 +20,8 @@ class ModelUpdateService(
     @Scheduled(fixedDelay = MODEL_UPDATE_DELAY_MS)
     fun updateModels() {
         val updatableAgents = agentService.getAgentNeedingModelUpdateIds()
-        if (updatableAgents.isNotEmpty()) {
-            val agentId = updatableAgents.random();
+        while (updatableAgents.isNotEmpty()) {
+            val agentId = updatableAgents.random()
             val entriesSize = agentService.getAgentDataEntriesSize(agentId)
             val lastApplied = agentService.getAgentLastAppliedDataEntryId(agentId)
             val start = (lastApplied ?: -1) + 1
