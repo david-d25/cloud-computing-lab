@@ -20,7 +20,8 @@ import java.util.concurrent.Executors
 @Qualifier("local-classpath")
 class LocalClasspathAgentExecutionService @Autowired constructor(
     private val agentRepository: AgentRepository,
-    private val transactionManager: PlatformTransactionManager
+    private val transactionManager: PlatformTransactionManager,
+    private val serverConfigService: ServerConfigService
 ): AgentExecutionService {
     private val executorService = Executors.newCachedThreadPool()
 
@@ -30,7 +31,7 @@ class LocalClasspathAgentExecutionService @Autowired constructor(
         try {
             val executorClass: Class<*> = Class.forName(getAgentSafe(id).type)
             if (AbstractAgentExecutor::class.java.isAssignableFrom(executorClass)) {
-                val context = RepositoryBasedAgentContext(id, agentRepository)
+                val context = RepositoryBasedAgentContext(id, agentRepository, serverConfigService)
                 val constructor = executorClass.getConstructor(AgentContext::class.java)
                 val executor = constructor.newInstance(context) as AbstractAgentExecutor
 
@@ -62,7 +63,7 @@ class LocalClasspathAgentExecutionService @Autowired constructor(
                         transactionManager.rollback(status)
                         getAgentSafe(id).let {
                             it.status = AgentStatusEntityEnum.ERROR
-                            it.memory[ERROR_MESSAGE] = "Unknown agent execution error"
+                            it.memory[ERROR_MESSAGE] = "В агенте произошла ошибка, но сервер не сообщил, какая именно"
                             agentRepository.save(it)
                         }
                     }
@@ -70,14 +71,14 @@ class LocalClasspathAgentExecutionService @Autowired constructor(
             } else {
                 getAgentSafe(id).let {
                     it.status = AgentStatusEntityEnum.ERROR
-                    it.memory[ERROR_MESSAGE] = "Agent id '${id}' has wrong type"
+                    it.memory[ERROR_MESSAGE] = "У агента с id $id неправильный тип"
                     agentRepository.save(it)
                 }
             }
         } catch (e: ClassNotFoundException) {
             getAgentSafe(id).let {
                 it.status = AgentStatusEntityEnum.ERROR
-                it.memory[ERROR_MESSAGE] = "Agent of type '${it.type}' not found"
+                it.memory[ERROR_MESSAGE] = "В сервере не нашелся агент с типом '${it.type}'"
                 agentRepository.save(it)
             }
         }

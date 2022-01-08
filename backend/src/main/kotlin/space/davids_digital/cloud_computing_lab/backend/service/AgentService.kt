@@ -1,6 +1,7 @@
 package space.davids_digital.cloud_computing_lab.backend.service
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import space.davids_digital.cloud_computing_lab.agent.AgentConstants
 import space.davids_digital.cloud_computing_lab.backend.model.AgentStatusModel
@@ -11,6 +12,8 @@ import space.davids_digital.cloud_computing_lab.backend.orm.entity.enum.AgentSta
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.mapping.toModel
 import space.davids_digital.cloud_computing_lab.backend.orm.repository.AgentRepository
 import space.davids_digital.cloud_computing_lab.backend.orm.repository.MarkChainTransitionRepository
+import space.davids_digital.cloud_computing_lab.backend.util.GlobalConstraints.AGENT_SCHEDULED_EXECUTION_CHECK_DELAY_MS
+import java.time.Instant
 import javax.annotation.PostConstruct
 import javax.transaction.Transactional
 
@@ -32,8 +35,19 @@ class AgentService @Autowired constructor(
             if (it.status == AgentStatusModel.RUNNING) {
                 agentRepository.findById(it.id).get().let { entity ->
                     entity.status = AgentStatusEntityEnum.ERROR
-                    entity.memory[AgentConstants.ERROR_MESSAGE] = "Executing host stopped working before agent completed its task"
+                    entity.memory[AgentConstants.ERROR_MESSAGE] = "Сервер выключился до того, как агент завершил работу"
                     agentRepository.save(entity)
+                }
+            }
+        }
+    }
+
+    @Scheduled(fixedDelay = AGENT_SCHEDULED_EXECUTION_CHECK_DELAY_MS)
+    fun checkAgentsRunSchedule() {
+        getAgents().forEach {
+            if (it.updatePeriodSeconds != null && it.updatePeriodSeconds > 0) {
+                if (it.lastUpdateTimestamp == null || (Instant.now().toEpochMilli() - it.lastUpdateTimestamp.toEpochMilli())/1000 > it.updatePeriodSeconds) {
+                    runAgent(it.id)
                 }
             }
         }

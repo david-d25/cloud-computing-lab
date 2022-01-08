@@ -1,7 +1,5 @@
 package space.davids_digital.cloud_computing_lab.backend.orm.entity
 
-import org.hibernate.annotations.NotFound
-import org.springframework.data.annotation.Reference
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.id.MarkChainTransitionId
 import java.io.Serializable
 import javax.persistence.*

@@ -52,6 +52,14 @@
                       <span class="info_name">)</span>
                     </div>
                   </transition-expand>
+                  <transition-expand>
+                    <div class="info error_info" v-if="agent.status === 'ERROR'">
+                      <div class="info_icon">
+                        <img src="assets/icons/info.svg" alt="icon">
+                      </div>
+                      <span class="info_value">{{ agent.memory['error_message'] || "Агент не смог выполниться, но сервер не сообщил почему" }}</span>
+                    </div>
+                  </transition-expand>
                 </div>
               </div>
             </transition-expand>
@@ -173,7 +181,7 @@ export default {
     },
 
     startUpdater() {
-      this.updaterIntervalId = setTimeout(this.backgroundUpdate, 3000)
+      this.updaterIntervalId = setTimeout(this.backgroundUpdate, 2000)
     },
 
     async backgroundUpdate() {
@@ -196,7 +204,7 @@ export default {
       } catch (e) {
         console.error(e);
       } finally {
-        this.updaterIntervalId = setTimeout(this.backgroundUpdate, 3000)
+        this.updaterIntervalId = setTimeout(this.backgroundUpdate, 2000)
       }
     },
 
@@ -431,6 +439,7 @@ export default {
 
     .info {
       margin: 5px;
+      text-align: center;
 
       .info_name {
         color: var(--grey)
@@ -443,6 +452,7 @@ export default {
       margin-top: 15px;
       position: relative;
       padding: 15px 15px 15px 50px;
+      text-align: left;
 
       .info_name {
         color: var(--dark-grey);
@@ -458,10 +468,23 @@ export default {
       position: relative;
       white-space: pre-wrap;
       padding: 15px 15px 15px 50px;
+      text-align: left;
 
       .info_name {
         color: var(--dark-grey);
       }
+    }
+
+    .error_info {
+      background: var(--just-a-little-red);
+      border-radius: 5px;
+      margin-top: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      position: relative;
+      white-space: pre-wrap;
+      padding: 15px 15px 15px 50px;
+      text-align: left;
     }
 
     .agent_arrow_sign {
