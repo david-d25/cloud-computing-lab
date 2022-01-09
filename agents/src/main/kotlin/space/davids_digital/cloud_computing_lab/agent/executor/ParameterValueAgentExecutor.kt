@@ -6,6 +6,7 @@ import space.davids_digital.cloud_computing_lab.agent.annotation.AgentExecutorPa
 import space.davids_digital.cloud_computing_lab.agent.context.AgentContext
 import space.davids_digital.cloud_computing_lab.agent.exception.AgentExecutionException
 
+@Deprecated("говнина, потом удалю")
 @AgentExecutor("Текст из параметра")
 @AgentExecutorParameter("Текст", "data", STRING,true)
 class ParameterValueAgentExecutor(context: AgentContext) : AbstractAgentExecutor(context) {
