@@ -30,7 +30,7 @@ DB_URL=jdbc:postgresql://localhost:5432/cloud_computing_dev
 DB_USERNAME=cloud_computing_dev
 DB_PASSWORD=cloud_computing_dev
 ```
-## How to run backend for development
+# How to run backend for development
 1. ```mvn clean package```
 2. [Prepare dev database](#dev-database-setup)
 3. [Configure environment variables for dev database connection](#dev-environment-variables)
