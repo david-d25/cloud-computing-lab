@@ -1,5 +1,5 @@
 <template>
-  <label class="wrapper">
+  <label class="wrapper" :class="{ disabled }">
     <span class="input_visual" :data-state-wrong="errorHint != null">
       <span class="input_wr">
         <span class="input_prefix" v-if="prefix">
@@ -8,6 +8,7 @@
         <input  class="input"
                 :type="type ? type : 'text'"
                 v-model="localText"
+                :disabled="disabled"
                 @keydown.esc="$event.target.blur()">
         <span class="input_hint" :class="{ active: localText.length !== 0 }" v-if="hint">{{ hint }}</span>
       </span>
@@ -31,12 +32,12 @@ export default {
   props: {
     hint: String,
     value: {
-      type: String,
       default: ''
     },
     prefix: String,
     errorHint: String,
-    type: String
+    type: String,
+    disabled: Boolean
   },
   data() {
     return {
@@ -109,6 +110,10 @@ export default {
     color: var(--dark-grey);
     top: -25%;
   }
+}
+
+.disabled .input {
+  color: var(--grey);
 }
 
 [data-state-wrong='true'] {

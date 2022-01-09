@@ -77,5 +77,13 @@
       font-size: 18px;
       border-radius: 5px;
     }
+
+    &[tiny] {
+      height: 30px;
+      font-size: 18px;
+      border-radius: 5px;
+      padding-left: 10px;
+      padding-right: 10px;
+    }
   }
 </style>

@@ -46,6 +46,7 @@
                     <span class="info_name">Обновляется каждые </span>
                     <span class="info_value">{{agent.updatePeriodSeconds}}</span>
                     <span class="info_name"> секунд</span>
+                    <btn class="info_disable_update_btn" thin grey tiny @click="disableUpdate(agent)">Выключить</btn>
                   </div>
                   <transition-expand>
                     <div class="info incomplete_model_info" v-if="agent.lastAppliedDataEntryId !== agent.lastDataEntryId">
@@ -74,8 +75,7 @@
           <transition-expand>
             <div class="agent_controls_wr" v-if="agent.expanded">
               <div class="agent_controls">
-<!--                TODO-->
-                <btn small thin grey disabled>&#9999; Редактировать</btn>
+                <btn small thin grey @click="openEditingDialog(agent)">&#9999; Редактировать</btn>
                 <btn small thin grey @click="deleteDialogTargetId = agent.id">&#10060; Удалить</btn>
                 <btn small thin grey v-if="agent.status !== 'RUNNING'" @click="runAgent(agent.id)">&#128640; Запустить сейчас</btn>
               </div>
@@ -99,11 +99,6 @@
                      v-model="newAgentForm.type.value"
                      :error-hint="newAgentForm.type.error"
                      :options="agentTypes.map(type => { return { value: type.type, title: type.title }})"/>
-      <text-input class="input"
-                  type="number"
-                  hint="Период обновления (сек)"
-                  :error-hint="newAgentForm.updatePeriodSeconds.error"
-                  v-model="newAgentForm.updatePeriodSeconds.value"/>
       <transition-expand>
         <div class="agent_parameters" v-if="newAgentForm.type.value">
           <div class="agent_parameter"
@@ -117,10 +112,60 @@
           </div>
         </div>
       </transition-expand>
+      <toggle-switch class="input" v-model="newAgentForm.autoUpdateSwitch.value">Автообновление</toggle-switch>
+      <transition-expand>
+        <div v-if="newAgentForm.autoUpdateSwitch.value">
+          <text-input class="input"
+                      type="number"
+                      hint="Период обновления (сек)"
+                      :error-hint="newAgentForm.updatePeriodSeconds.error"
+                      v-model="newAgentForm.updatePeriodSeconds.value"/>
+        </div>
+      </transition-expand>
       <toggle-switch class="input" v-model="newAgentForm.visible.value">Видимый</toggle-switch>
       <toggle-switch class="input" v-model="newAgentForm.sensitive.value">Чувствительный контент</toggle-switch>
       <loading-content :status="newAgentFormStatus" @reload="createAgent">
         <btn black thick medium class="dialog_button create_button" @click="createAgent">Создать</btn>
+      </loading-content>
+    </dialog-popup>
+
+    <dialog-popup :show="editAgentFormTargetId != null" @close="editAgentFormTargetId = null">
+      <div class="title">Редактирование</div>
+      <text-input class="input"
+                  hint="Название"
+                  :error-hint="editAgentForm.name.error"
+                  v-model="editAgentForm.name.value"/>
+      <text-input class="input"
+                  disabled
+                  hint="Тип"
+                  v-model="(agentTypes.find(t => t.type === editAgentForm.type.value) || {}).title"/>
+      <transition-expand>
+        <div class="agent_parameters" v-if="editAgentForm.type.value">
+          <div class="agent_parameter"
+               v-for="parameter in agentTypes.find(t => t.type === editAgentForm.type.value).parameters"
+               :key="parameter.name">
+            <text-input class="input"
+                        v-model="editAgentForm.parameters[parameter.name].value"
+                        :type="parameter.type"
+                        :hint="parameter.title"
+                        :error-hint="editAgentForm.parameters[parameter.name].error"/>
+          </div>
+        </div>
+      </transition-expand>
+      <toggle-switch class="input" v-model="editAgentForm.autoUpdateSwitch.value">Автообновление</toggle-switch>
+      <transition-expand>
+        <div v-if="editAgentForm.autoUpdateSwitch.value">
+          <text-input class="input"
+                      type="number"
+                      hint="Период обновления (сек)"
+                      :error-hint="editAgentForm.updatePeriodSeconds.error"
+                      v-model="editAgentForm.updatePeriodSeconds.value"/>
+        </div>
+      </transition-expand>
+      <toggle-switch class="input" v-model="editAgentForm.visible.value">Видимый</toggle-switch>
+      <toggle-switch class="input" v-model="editAgentForm.sensitive.value">Чувствительный контент</toggle-switch>
+      <loading-content :status="editAgentFormStatus" @reload="submitEditingDialog">
+        <btn black thick medium class="dialog_button create_button" @click="submitEditingDialog">Сохранить</btn>
       </loading-content>
     </dialog-popup>
 
@@ -163,11 +208,23 @@ export default {
         name: { value: '', error: null },
         type: { value: '', error: null },
         updatePeriodSeconds: { value: '', error: null },
-        visible: { value: true },
+        autoUpdateSwitch: { value: false },
         sensitive: { value: false },
+        visible: { value: true },
         parameters: {}
       },
-      updaterIntervalId: null
+      updaterIntervalId: null,
+      editAgentFormTargetId: null,
+      editAgentFormStatus: 'ready',
+      editAgentForm: {
+        name: { value: '', error: null },
+        type: { value: '' },
+        updatePeriodSeconds: { value: '', error: null },
+        autoUpdateSwitch: { value: false },
+        sensitive: { value: false },
+        visible: { value: true },
+        parameters: {}
+      }
     }
   },
   mounted() {
@@ -176,10 +233,12 @@ export default {
   },
   methods: {
     async reloadAgents() {
+      let expandedMap = {};
+      this.agents.forEach(agent => expandedMap[agent.id] = agent.expanded)
       try {
         this.agentsStatus = "loading";
-        this.agents = (await axios.get('/api/manage/agent')).data;
-        this.agents.forEach(agent => Vue.set(agent, 'expanded', false));
+        this.agents = (await axios.get('/api/manage/agent')).data.sort((a, b) => a.id - b.id);
+        this.agents.forEach(agent => Vue.set(agent, 'expanded', expandedMap[agent.id] || false));
         this.agentTypes = (await axios.get('/api/manage/agent/type')).data;
         this.agentsStatus = "ready";
       } catch (e) {
@@ -243,12 +302,13 @@ export default {
     },
 
     resetNewAgentForm() {
-      this.newAgentForm.name.value = '';
-      this.newAgentForm.type.value = '';
-      this.newAgentForm.updatePeriodSeconds.value = '';
-      this.newAgentForm.visible.value = true;
-      this.newAgentForm.sensitive.value = false;
-      this.newAgentForm.parameters = {};
+      let _ = this.newAgentForm;
+      _.name.value = '';
+      _.type.value = '';
+      _.updatePeriodSeconds.value = '';
+      _.visible.value = true;
+      _.sensitive.value = false;
+      _.parameters = {};
     },
 
     getUserFriendlyAgentTypeName(type) {
@@ -258,6 +318,64 @@ export default {
     getUserFriendlyDate(timestamp) {
       let date = new Date(timestamp*1000);
       return `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()} ${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+    },
+
+    openEditingDialog(agent) {
+      this.editAgentFormTargetId = agent.id;
+      this.editAgentFormStatus = 'ready';
+      let _ = this.editAgentForm;
+      _.name = { value: agent.name, error: null };
+      _.type = { value: agent.type };
+      _.updatePeriodSeconds = { value: Math.abs(agent.updatePeriodSeconds), error: null };
+      _.autoUpdateSwitch = { value: agent.updatePeriodSeconds > 0 }
+      _.sensitive = { value: agent.sensitive }
+      _.visible = { value: agent.visible }
+      _.parameters = {};
+      if (_.type.value) {
+        this.agentTypes.find(t => t.type === _.type.value).parameters.forEach(p =>
+          _.parameters[p.name] = { value: agent.parameters[p.name], error: null }
+        )
+      }
+    },
+
+    async submitEditingDialog() {
+      if (this.editAgentFormTargetId != null) {
+        let form = this.editAgentForm;
+        let ready = true;
+        ready &= this.validateNotBlank(form.name);
+        ready &= this.validateNotBlank(form.type);
+        ready &= this.validateNotNegative(form.updatePeriodSeconds);
+        if (form.type.value) {
+          for (let parameter of this.agentTypes.find(t => t.type === form.type.value).parameters) {
+            if (parameter.required) {
+              ready &= this.validateNotBlank(form.parameters[parameter.name]);
+            }
+          }
+        }
+        if (ready) {
+          this.editAgentFormStatus = 'loading';
+          try {
+            let parameters = {};
+            for (let name in form.parameters)
+              parameters[name] = form.parameters[name].value;
+
+            await axios.post('/api/manage/agent', {
+              id: this.editAgentFormTargetId,
+              name: form.name.value,
+              type: form.type.value,
+              updatePeriodSeconds: form.autoUpdateSwitch.value ? +form.updatePeriodSeconds.value : -form.updatePeriodSeconds.value,
+              sensitive: form.sensitive.value,
+              visible: form.visible.value,
+              parameters
+            });
+            this.editAgentFormStatus = 'ready';
+            this.editAgentFormTargetId = null;
+            await this.reloadAgents();
+          } catch (e) {
+            this.editAgentFormStatus = e.request.status === 0 ? 'offline' : 'error';
+          }
+        }
+      }
     },
 
     async createAgent() {
@@ -272,7 +390,6 @@ export default {
           }
         }
       }
-
       if (ready) {
         this.newAgentFormStatus = 'loading';
         try {
@@ -280,12 +397,13 @@ export default {
           for (let name in this.newAgentForm.parameters)
             parameters[name] = this.newAgentForm.parameters[name].value;
 
+          let form = this.newAgentForm;
           await axios.put('/api/manage/agent', {
-            name: this.newAgentForm.name.value,
-            type: this.newAgentForm.type.value,
-            updatePeriodSeconds: +this.newAgentForm.updatePeriodSeconds.value,
-            sensitive: this.newAgentForm.sensitive.value,
-            visible: this.newAgentForm.visible.value,
+            name: form.name.value,
+            type: form.type.value,
+            updatePeriodSeconds: form.autoUpdateSwitch.value ? +form.updatePeriodSeconds.value : 0,
+            sensitive: form.sensitive.value,
+            visible: form.visible.value,
             parameters
           });
           this.newAgentFormStatus = 'ready';
@@ -302,6 +420,25 @@ export default {
       try {
         this.agentsStatus = 'loading';
         await axios.post(`/api/manage/agent/${agentId}/run`);
+        this.agentsStatus = 'ready';
+        await this.reloadAgents();
+      } catch (e) {
+        if (e.request)
+          this.agentsStatus = e.request.status === 0 ? 'offline' : 'error';
+        else {
+          this.agentsStatus = 'error';
+          console.error(e);
+        }
+      }
+    },
+
+    async disableUpdate(agent) {
+      try {
+        this.agentsStatus = 'loading';
+        await axios.post(`/api/manage/agent`, {
+          id: agent.id,
+          updatePeriodSeconds: -Math.abs(agent.updatePeriodSeconds)
+        });
         this.agentsStatus = 'ready';
         await this.reloadAgents();
       } catch (e) {
@@ -417,7 +554,7 @@ export default {
       .agent_icons {
         flex: 1;
       }
-      
+
       .head_icon {
         width: 30px;
         height: 30px;
@@ -481,6 +618,10 @@ export default {
       .info_name {
         color: var(--dark-grey);
       }
+    }
+
+    .info_disable_update_btn {
+      margin-left: 10px;
     }
 
     .incomplete_model_info {
