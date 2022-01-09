@@ -5,15 +5,15 @@ import org.springframework.web.servlet.DispatcherServlet
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer
 import javax.servlet.ServletContext
 
-
 class WebConfig : AbstractAnnotationConfigDispatcherServletInitializer() {
     override fun onStartup(servletContext: ServletContext) {
+        System.setProperty("spring.data.rest.base-path", servletContext.contextPath + "/api")
         val applicationContext = AnnotationConfigWebApplicationContext()
         applicationContext.register(AppConfig::class.java)
         val dispatcherServlet = DispatcherServlet(applicationContext)
         val dispatcher = servletContext.addServlet("dispatcher", dispatcherServlet)
         dispatcher.setLoadOnStartup(1)
-        dispatcher.addMapping("/")
+        dispatcher.addMapping("/api/*")
     }
 
     override fun getServletMappings(): Array<String> = arrayOf()

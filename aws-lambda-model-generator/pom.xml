@@ -5,7 +5,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>cloud-computing-lab-aws-lambda-model-generator</artifactId>
+    <artifactId>aws-lambda-model-generator</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 
     <modelVersion>4.0.0</modelVersion>

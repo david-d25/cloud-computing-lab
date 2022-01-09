@@ -11,6 +11,7 @@
         <module>agents</module>
         <module>tokenizer</module>
         <module>aws-lambda-model-generator</module>
+        <module>bundle</module>
     </modules>
 
     <properties>

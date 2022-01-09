@@ -5,8 +5,7 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>cloud-computing-lab-tokenizer</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <artifactId>tokenizer</artifactId>
 
     <modelVersion>4.0.0</modelVersion>
 
