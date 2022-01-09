@@ -77,7 +77,7 @@ class VkGroupAgentExecutor(context: AgentContext) : AbstractAgentExecutor(contex
         if (wall.response == null) {
             if (wall.error != null) {
                 if (wall.error.errorCode == 100)
-                    throw AgentExecutionException("Этот агент может читать только открытые группы")
+                    throw AgentExecutionException("Нет доступа к группе. Возможно, группа закрыта или удалена")
                 throw AgentExecutionException("Ошибка API: '${wall.error.errorMsg}'")
             }
             throw AgentExecutionException("Пустой ответ от $API_DOMAIN")
