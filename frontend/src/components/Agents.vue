@@ -458,6 +458,9 @@ export default {
       }
     }
   },
+  beforeDestroy() {
+    clearTimeout(this.updaterIntervalId);
+  },
   watch: {
     deleteDialogTargetId() {
       this.deleteDialogStatus = 'ready';

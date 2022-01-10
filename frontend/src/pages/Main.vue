@@ -77,7 +77,7 @@ export default {
       try {
         this.generateStatus = 'loading';
         let styles = this.selectedStyles.join(',');
-        let dto = (await axios.get(`/api/generate?text=${this.text}&styles=${styles}`)).data;
+        let dto = (await axios.get(`/api/generate?text=${this.text.replaceAll('#', '%23')}&styles=${styles}`)).data;
         this.text = dto['beginning'] + dto['generated'];
         this.generateStatus = 'ready';
       } catch (e) {

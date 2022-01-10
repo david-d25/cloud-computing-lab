@@ -2,7 +2,6 @@
   <div id="root" :data-theme="$store.state.theme">
     <router-view :key="this.$route.fullPath"/>
     <settings-dialog :show="$store.state.settingsDialog" @close="$store.commit('closeSettings')"/>
-    <flaticon-credits/>
   </div>
 </template>
 
@@ -12,7 +11,6 @@
   import VueRouter from "vue-router";
   import Main from "#/pages/Main";
   import AdminPanel from "#/pages/AdminPanel";
-  import FlaticonCredits from "#/components/FlaticonCredits";
   import DialogPopup from "#/components/dialogs/DialogPopup";
   import SettingsDialog from "#/components/dialogs/SettingsDialog";
 
@@ -52,7 +50,6 @@
     components: {
       SettingsDialog,
       DialogPopup,
-      FlaticonCredits,
       VueRouter
     },
     router,
