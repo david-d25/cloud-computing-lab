@@ -3,6 +3,9 @@ package space.davids_digital.cloud_computing_lab.backend
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.reflections.Reflections
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
@@ -15,10 +18,13 @@ import org.springframework.orm.hibernate5.LocalSessionFactoryBean
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.EnableTransactionManagement
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext
 import space.davids_digital.cloud_computing_lab.agent.annotation.AgentExecutor
 import space.davids_digital.cloud_computing_lab.agent.annotation.AgentExecutorParameter
 import space.davids_digital.cloud_computing_lab.backend.model.AgentExecutorMetaInfo
 import space.davids_digital.cloud_computing_lab.backend.model.AgentExecutorParameterMetaInfo
+import space.davids_digital.cloud_computing_lab.backend.service.ModelControlService
+import space.davids_digital.cloud_computing_lab.backend.service.ServerConfigService
 import java.util.*
 import javax.sql.DataSource
 
@@ -30,6 +36,15 @@ import javax.sql.DataSource
 @EnableJpaRepositories(entityManagerFactoryRef = "sessionFactory")
 @EnableTransactionManagement
 class AppConfig {
+
+    @Autowired
+    private lateinit var applicationContext: AnnotationConfigWebApplicationContext
+
+    @Autowired
+    private lateinit var configService: ServerConfigService
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     @Bean
     fun sessionFactory(): LocalSessionFactoryBean {
         val sessionFactory = LocalSessionFactoryBean()
@@ -63,10 +78,29 @@ class AppConfig {
     }
 
     @Bean
+    fun modelControlService(): ModelControlService {
+        logger.info("Model control service initialization")
+        val entryName = "MODEL_CONTROL.USE_AWS_LAMBDA"
+        val entryValue = configService.getConfig(entryName)
+        val qualifier = if (entryValue.toBoolean()) {
+            logger.info("$entryName flag found, using AWS Lambda control service")
+            "aws-lambda"
+        } else {
+            logger.info("$entryName flag not found, using local control service")
+            "local"
+        }
+        return BeanFactoryAnnotationUtils.qualifiedBeanOfType(
+            applicationContext.beanFactory,
+            ModelControlService::class.java,
+            qualifier
+        )
+    }
+
+    @Bean
     fun hibernateProperties(): Properties {
         val properties = Properties()
         properties["hibernate.hbm2ddl.auto"] = "update"
-        properties["hibernate.jdbc.batch_size"] = "15000"
+        properties["hibernate.jdbc.batch_size"] = "1500"
         properties["hibernate.dialect"] = "org.hibernate.dialect.PostgreSQLDialect"
 //        properties["hibernate.show_sql"] = "true"
         return properties

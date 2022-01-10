@@ -8,8 +8,8 @@ import space.davids_digital.cloud_computing_lab.tokenizer.Tokenizer.isTerminator
 import java.util.*
 
 private const val MIN_WORDS = 2
-private const val SOFT_MAX_WORDS = 10
-private const val HARD_MAX_WORDS = 28
+private const val SOFT_MAX_WORDS = 8
+private const val HARD_MAX_WORDS = 48
 
 @Service
 class TextGeneratorService(
@@ -73,7 +73,7 @@ class TextGeneratorService(
                         )
 
                         newWordsAdded = continuation.split(" ").size
-                        newSentenceWord = false
+                        newSentenceWord = result.isEmpty() || result.substring(result.length - 1).isTerminator()
                     }
                     break
                 }
