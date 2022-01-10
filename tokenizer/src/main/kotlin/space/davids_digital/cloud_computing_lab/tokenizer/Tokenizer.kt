@@ -14,7 +14,7 @@ object Tokenizer {
     fun String?.isTerminator() = this?.matches(Regex("[.?!]+")) ?: false
     fun String?.isWord() = this != null && this.matches(Regex("[()\\p{L}+*<>{}\\[\\]!@#\$%^&\"'`~-]+|\\d+"))
 
-    fun generateTransitions(text: String, maxWordsPerTransition: Int): Set<Transition> {
+    fun generateTransitions(text: String, minWordsPerTransition: Int, maxWordsPerTransition: Int): Set<Transition> {
         val tokens = tokenize(text)
         val result = mutableMapOf<Pair<String?, String?>, Transition>()
         fun MutableMap<Pair<String?, String?>, Transition>.putTransition(beginning: String?, continuation: String?) {
@@ -76,8 +76,7 @@ object Tokenizer {
             }
 
             val wordsAvailable = wordsAvailableInSentence(currentTokenIndex + 1, maxWordsPerTransition)
-            repeat(maxWordsPerTransition) {
-                val wordsToUse = it + 1
+            for (wordsToUse in minWordsPerTransition .. maxWordsPerTransition) {
                 if (wordsAvailable >= wordsToUse) {
                     result.putTransition(beginning, grabNextNWords(currentTokenIndex + 1, wordsToUse))
                 } else if (wordsToUse == 1 && wordsAvailable == 0)
