@@ -65,7 +65,14 @@ export default {
         Vue.set(this, 'originalConfig', JSON.parse(JSON.stringify(this.config)));
         this.configStatus = 'ready';
       } catch (e) {
-        this.configStatus = e.request.status === 0 ? 'offline' : 'error';
+        switch (e.request.status) {
+          case 0:
+            this.configStatus = 'offline'; break;
+          case 403:
+            this.configStatus = 'forbidden'; break;
+          default:
+            this.configStatus = 'error';
+        }
       }
 
     },

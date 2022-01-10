@@ -26,7 +26,7 @@ class AgentService @Autowired constructor(
     fun getAgents() = agentRepository.findAll().map { it.toModel(agentRepository) }
 
     fun getAgentNeedingModelUpdateIds() = agentRepository.getAgentNeedingModelUpdateIds()
-    fun getAgentDataEntriesSize(id: Int) = agentRepository.getAgentDataEntriesSize(id)
+    fun getAgentMaxDataEntryId(id: Int) = agentRepository.getAgentMaxDataEntryId(id)
     fun getAgentLastAppliedDataEntryId(id: Int) = agentRepository.getAgentLastAppliedDataEntryId(id)
 
     @PostConstruct

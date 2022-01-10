@@ -18,12 +18,11 @@ class ModelUpdateService(
     fun updateModels() {
         val updatableAgents = agentService.getAgentNeedingModelUpdateIds()
         updatableAgents.forEach { agentId ->
-            val entriesSize = agentService.getAgentDataEntriesSize(agentId)
+            val end = agentService.getAgentMaxDataEntryId(agentId)
             val lastApplied = agentService.getAgentLastAppliedDataEntryId(agentId)
             val start = (lastApplied ?: -1) + 1
-            val end = entriesSize - 1
 
-            if (lastApplied == end)
+            if (end == null || lastApplied == end)
                 return
 
             logger.info(

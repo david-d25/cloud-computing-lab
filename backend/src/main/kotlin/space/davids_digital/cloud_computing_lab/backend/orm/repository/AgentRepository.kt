@@ -17,9 +17,6 @@ interface AgentRepository: CrudRepository<AgentEntity, Int> {
             "a.lastAppliedDataEntry < size(data) - 1)")
     fun getAgentNeedingModelUpdateIds(): List<Int>
 
-    @Query("select max(size(data)) from agent a join a.data data where a.id = :id")
-    fun getAgentDataEntriesSize(@Param("id") id: Int): Long
-
     @Query("select max(key) from agent_data where agent_id = :id", nativeQuery = true)
     fun getAgentMaxDataEntryId(@Param("id") id: Int): Long?
 
