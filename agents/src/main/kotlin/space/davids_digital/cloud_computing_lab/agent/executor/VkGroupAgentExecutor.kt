@@ -56,7 +56,7 @@ class VkGroupAgentExecutor(context: AgentContext) : AbstractAgentExecutor(contex
     }
 
     private fun removeGarbage(text: String) = text
-        .replace(Regex("[\\r\\n]{2,}"), "")
+        .replace(Regex("[\\r\\n]{2,}"), "\n")
         .replace("\u00a0", " ")
         .replace(Regex("(\\S*?://)?[-a-zA-Z0-9@:%._+~#=]{1,256}\\.[a-zA-Z0-9()]{2,6}\\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)"), "")
 
