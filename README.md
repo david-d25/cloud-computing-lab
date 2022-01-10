@@ -53,17 +53,26 @@ DB_PASSWORD=cloud_computing_dev
 ## Amazon EC2 instances
 - backend
   - Type: t2.micro
-
+## Amazon RDS
+- Method: easy create
+- Engine: PostgreSQL 13
+- Template: Dev/Test
+- DB instance identifier: cloud-computing-dev
+- Master username: postgres
+- Master password: postgres
 ## Amazon functions
 1. lambda-model-generator
     - Runtime: Java 11
+    - Region: us-east-2
     - Architecture: x86_64
     - Execution role: cloud_computing_lab_lambda
     - Enable Network: Yes
     - VPC: (same as in EC2 'backend' instance)
     - Subnets (same as in EC2 'backend' instance)
     - Security groups: default
+    - Runtime settings
+      - Handler: space.davids_digital.cloud_computing_lab.lambda.handler.Handler
     - Triggers:
       - API Gateway
-        - API Type: REST API
-        - Security: API key
+        - API Type: HTTP API
+        - Security: Open
