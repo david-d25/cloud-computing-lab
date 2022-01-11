@@ -1,5 +1,7 @@
 package space.davids_digital.cloud_computing_lab.backend.service
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider
+import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder
@@ -20,11 +22,29 @@ import java.nio.charset.StandardCharsets
 @Qualifier("aws-lambda")
 class AwsLambdaModelControlService(
     private val objectMapper: ObjectMapper,
-    private val environment: Environment
+    private val environment: Environment,
+    private val configService: ServerConfigService
 ): ModelControlService {
+    companion object {
+        const val AWS_ACCESS_KEY = "AWS_ACCESS_KEY"
+        const val AWS_SECRET_KEY = "AWS_SECRET_KEY"
+    }
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun applyDataset(agentId: Int, dataId: Long) {
+        val accessKey = configService.getConfig(AWS_ACCESS_KEY)
+        val secretKey = configService.getConfig(AWS_SECRET_KEY)
+
+        if (accessKey == null) {
+            logger.error("'$AWS_ACCESS_KEY' config is not provided, dataset won't be applied")
+            return
+        }
+
+        if (secretKey == null) {
+            logger.error("'$AWS_SECRET_KEY' config is not provided, dataset won't be applied")
+            return
+        }
+
         val functionName = "lambda-model-generator"
         val invokeRequest = InvokeRequest()
             .withFunctionName(functionName)
@@ -43,7 +63,7 @@ class AwsLambdaModelControlService(
         logger.info("Invoking AWS Lambda function to apply data id $dataId for agent id $agentId")
         try {
             val awsLambda = AWSLambdaClientBuilder.standard()
-                .withCredentials(ProfileCredentialsProvider())
+                .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials(accessKey, secretKey)))
                 .withRegion(Regions.US_EAST_2).build()
             invokeResult = awsLambda.invoke(invokeRequest)
             val responseBody = String(invokeResult.payload.array(), StandardCharsets.UTF_8)

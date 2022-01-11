@@ -49,6 +49,9 @@ DB_PASSWORD=cloud_computing_dev
       - AmazonEC2FullAccess
       - AmazonRDSDataFullAccess
       - AWSLambdaBasicExecutionRole
+2. aws-lambda-user
+    - Permissions:
+      - AWSLambda_FullAccess
 
 ## Amazon EC2 instances
 - backend
