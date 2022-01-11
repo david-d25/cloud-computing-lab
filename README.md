@@ -56,6 +56,7 @@ DB_PASSWORD=cloud_computing_dev
 ## Amazon EC2 instances
 - backend
   - Type: t2.micro
+
 ## Amazon RDS
 - Method: easy create
 - Engine: PostgreSQL 13
@@ -63,6 +64,7 @@ DB_PASSWORD=cloud_computing_dev
 - DB instance identifier: cloud-computing-dev
 - Master username: postgres
 - Master password: postgres
+
 ## Amazon functions
 1. lambda-model-generator
     - Runtime: Java 11
