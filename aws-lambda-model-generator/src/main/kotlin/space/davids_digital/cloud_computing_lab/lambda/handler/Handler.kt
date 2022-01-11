@@ -67,6 +67,8 @@ class Handler : RequestHandler<Map<String, String>, String> {
                 throw RuntimeException(e)
             }
 
+            connection.close()
+
             return "200 OK"
         } catch (e: RuntimeException) {
             return "500 Internal Server Error\n\n{\"error\": 1, \"error_message:\": \"${e.message}\"}"
