@@ -38,7 +38,6 @@ class Handler : RequestHandler<Map<String, String>, String> {
             val props = Properties()
             props.setProperty("user", getParamSafe(DB_USERNAME))
             props.setProperty("password", getParamSafe(DB_PASSWORD))
-            props.setProperty("ssl", "true")
             val connection = DriverManager.getConnection(getParamSafe(DB_URL), props)
             logger.log("Connected")
 
@@ -78,13 +77,19 @@ class Handler : RequestHandler<Map<String, String>, String> {
         prepareStatement("select value from agent_data where agent_id = ? and key = ?").let {
             it.setInt(1, agentId)
             it.setLong(2, dataId)
-            it.executeQuery().getString(1)
+            it.executeQuery().let { r ->
+                r.next()
+                r.getString(1)
+            }
         }
 
     private fun Connection.getRecommendedMaxWordsPerTransition(agentId: Int) =
         prepareStatement("select coalesce(sum(transition_count)/count(entry_id), 1) from mark_chain_transition where agent_id = ?").let {
             it.setInt(1, agentId)
-            it.executeQuery().getDouble(1)
+            it.executeQuery().let { r ->
+                r.next()
+                r.getDouble(1)
+            }
         }
 
     private fun Connection.existsByAgentIdAndBeginningAndContinuation(agentId: Int, beginning: String?, continuation: String?) =
@@ -94,7 +99,10 @@ class Handler : RequestHandler<Map<String, String>, String> {
             it.setString(3, beginning)
             it.setString(4, continuation)
             it.setString(5, continuation)
-            it.executeQuery().getBoolean(1)
+            it.executeQuery().let { r ->
+                r.next()
+                r.getBoolean(1)
+            }
         }
 
     private fun Connection.putNewTransition(agentId: Int, beginning: String?, continuation: String?, count: Long) =

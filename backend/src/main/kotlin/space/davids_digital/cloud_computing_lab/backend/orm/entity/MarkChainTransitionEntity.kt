@@ -14,10 +14,6 @@ data class MarkChainTransitionEntity (
     @Column(name = "agent_id", nullable = false)
     var agentId: Int? = null,
 
-    @Id
-    @Column(name = "entry_id", nullable = false)
-    var entryId: Int? = null,
-
     @Column(name = "beginning", nullable = true)
     var beginning: String? = null,
 

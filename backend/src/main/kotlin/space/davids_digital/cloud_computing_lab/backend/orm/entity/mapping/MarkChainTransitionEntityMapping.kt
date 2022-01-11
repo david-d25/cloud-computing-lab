@@ -5,7 +5,6 @@ import space.davids_digital.cloud_computing_lab.backend.orm.entity.MarkChainTran
 
 fun MarkChainTransitionEntity.toModel() = MarkChainTransitionModel(
     agentId = agentId!!,
-    entryId = entryId!!,
     beginning = beginning,
     continuation = continuation,
     transitionCount = transitionCount
