@@ -22,7 +22,7 @@
     <dialog-popup red-background :show="sensitiveStyleWarningTarget" @close="onSensitiveStyleWarningClose">
       <div class="dialog_title">&#9888;&#65039; &#9888;&#65039; &#9888;&#65039;</div>
       <div class="dialog_title bold">Sensitive content ahead!</div>
-      <div class="dialog_text">Это стиль может содержать оскорбления, нецензурную брань и ещё много плохих вещей.</div>
+      <div class="dialog_text">Этот стиль может содержать оскорбления, нецензурную брань и ещё много плохих вещей.</div>
       <btn very-big thick on-dark-background class="dialog_cancel_btn" @click="onSensitiveStyleWarningClose">
         Выберу что-то другое
       </btn>

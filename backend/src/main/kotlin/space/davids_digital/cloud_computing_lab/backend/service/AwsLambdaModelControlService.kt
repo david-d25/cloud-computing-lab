@@ -2,7 +2,6 @@ package space.davids_digital.cloud_computing_lab.backend.service
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.BasicAWSCredentials
-import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder
 import com.amazonaws.services.lambda.model.InvokeRequest
@@ -14,8 +13,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.env.Environment
 import org.springframework.core.env.get
 import org.springframework.stereotype.Service
-import space.davids_digital.cloud_computing_lab.backend.util.GlobalConstraints.MAX_WORDS_PER_TRANSITION_BIAS
-import space.davids_digital.cloud_computing_lab.backend.util.GlobalConstraints.MIN_WORDS_PER_TRANSITION
 import java.nio.charset.StandardCharsets
 
 @Service
@@ -53,9 +50,7 @@ class AwsLambdaModelControlService(
                 dbUsername = environment["DB_USERNAME"],
                 dbPassword = environment["DB_PASSWORD"],
                 agentId = agentId,
-                dataId = dataId,
-                maxWordsPerTransitionBias = MAX_WORDS_PER_TRANSITION_BIAS,
-                minWordsPerTransition = MIN_WORDS_PER_TRANSITION
+                dataId = dataId
             )))
 
         lateinit var invokeResult: InvokeResult
@@ -102,12 +97,6 @@ class AwsLambdaModelControlService(
         val agentId: Int? = null,
 
         @get:JsonProperty("data_id")
-        val dataId: Long? = null,
-
-        @get:JsonProperty("max_words_per_transition_bias")
-        val maxWordsPerTransitionBias: Int? = null,
-
-        @get:JsonProperty("min_words_per_transition")
-        val minWordsPerTransition: Int? = null
+        val dataId: Long? = null
     )
 }

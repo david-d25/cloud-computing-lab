@@ -1,10 +1,9 @@
 package space.davids_digital.cloud_computing_lab.backend.service
 
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import space.davids_digital.cloud_computing_lab.backend.util.GlobalConstraints.MODEL_UPDATE_DELAY_MS
+import space.davids_digital.cloud_computing_lab.backend.util.GlobalConstants.MODEL_UPDATE_DELAY_MS
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 
@@ -18,7 +17,7 @@ class ModelUpdateService(
     }
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
-    private val threadPool = Executors.newCachedThreadPool()
+    private val threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())
 
     @Scheduled(fixedDelay = MODEL_UPDATE_DELAY_MS)
     fun updateModels() {

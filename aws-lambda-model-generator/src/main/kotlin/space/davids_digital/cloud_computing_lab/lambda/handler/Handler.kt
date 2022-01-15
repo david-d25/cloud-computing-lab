@@ -17,8 +17,6 @@ class Handler : RequestHandler<Map<String, String>, String> {
         const val DB_PASSWORD = "db_password"
         const val AGENT_ID = "agent_id"
         const val DATA_ID = "data_id"
-        const val MAX_WORDS_PER_TRANSITION_BIAS = "max_words_per_transition_bias"
-        const val MIN_WORDS_PER_TRANSITION = "min_words_per_transition"
     }
 
     override fun handleRequest(event: Map<String, String>, context: Context): String {
@@ -31,9 +29,6 @@ class Handler : RequestHandler<Map<String, String>, String> {
             val agentId = getParamSafe(AGENT_ID).toInt()
             val dataId = getParamSafe(DATA_ID).toLong()
 
-            val maxWordsPerTransitionBias = getParamSafe(MAX_WORDS_PER_TRANSITION_BIAS).toInt()
-            val minWordsPerTransition = getParamSafe(MIN_WORDS_PER_TRANSITION).toInt()
-
             logger.log("Trying to connect...")
             val props = Properties()
             props.setProperty("user", getParamSafe(DB_USERNAME))
@@ -43,8 +38,8 @@ class Handler : RequestHandler<Map<String, String>, String> {
 
             val data = connection.getData(agentId, dataId) ?: throw RuntimeException("Data id $dataId not found in agent id $agentId")
 
-            val maxWordsPerTransition = maxWordsPerTransitionBias + floor(connection.getRecommendedMaxWordsPerTransition(agentId)).toInt()
-            val transitions = Tokenizer.generateTransitions(data, minWordsPerTransition, maxWordsPerTransition)
+            val maxWordsPerTransition = floor(connection.getRecommendedMaxWordsPerTransition(agentId)).toInt()
+            val transitions = Tokenizer.generateTransitions(data, 1, maxWordsPerTransition)
 
             // start transaction
             connection.autoCommit = false

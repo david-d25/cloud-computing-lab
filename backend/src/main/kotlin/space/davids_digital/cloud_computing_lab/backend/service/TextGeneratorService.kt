@@ -8,7 +8,7 @@ import space.davids_digital.cloud_computing_lab.tokenizer.Tokenizer.isTerminator
 import java.util.*
 
 private const val MIN_WORDS = 2
-private const val SOFT_MAX_WORDS = 8
+private const val SOFT_MAX_WORDS = 24
 private const val HARD_MAX_WORDS = 48
 
 @Service
@@ -47,11 +47,15 @@ class TextGeneratorService(
             if (wordsGenerated < MIN_WORDS)
                 currentTransitions = currentTransitions.filter { it.continuation != null }.toMutableList()
 
+            val endingTransitions = currentTransitions.filter { it.continuation == null }.toMutableList()
+            if (wordsGenerated > SOFT_MAX_WORDS && endingTransitions.isNotEmpty())
+                currentTransitions = endingTransitions
+
             val divider = currentTransitions.sumOf { it.transitionCount }
 
             var rVal = Math.random()
 
-            var newWordsAdded = 1;
+            var newWordsAdded = 1
             for (i in currentTransitions.indices) {
                 rVal -= currentTransitions[i].transitionCount.toDouble() / divider
 

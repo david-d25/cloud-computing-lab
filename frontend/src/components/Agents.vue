@@ -38,6 +38,11 @@
                     <div class="info last_run_info" v-else>
                       <span class="info_name">Еще не запускался</span>
                     </div>
+                    <div class="info data_size_info">
+                      <span class="info_name">Содержит </span>
+                      <span class="info_value">{{ (agent.lastDataEntryId || 0) + 1 }}</span>
+                      <span class="info_name">блоков данных</span>
+                    </div>
                   </div>
                   <div class="info update_period_info" v-if="agent.updatePeriodSeconds > 0">
                     <div class="info_icon">

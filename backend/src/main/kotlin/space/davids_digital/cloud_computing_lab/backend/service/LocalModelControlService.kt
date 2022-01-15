@@ -5,10 +5,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import space.davids_digital.cloud_computing_lab.backend.orm.repository.AgentRepository
 import space.davids_digital.cloud_computing_lab.backend.orm.repository.MarkChainTransitionRepository
-import space.davids_digital.cloud_computing_lab.backend.util.GlobalConstraints.MAX_WORDS_PER_TRANSITION_BIAS
-import space.davids_digital.cloud_computing_lab.backend.util.GlobalConstraints.MIN_WORDS_PER_TRANSITION
 import space.davids_digital.cloud_computing_lab.tokenizer.Tokenizer
-import java.util.concurrent.Executors
 import kotlin.math.floor
 
 @Service
@@ -22,8 +19,8 @@ class LocalModelControlService(
     override fun applyDataset(agentId: Int, dataId: Long) {
         val data = agentRepository.getDataByKey(agentId, dataId) ?: throw ServiceException("Data id $dataId not found in agent id $agentId")
 
-        val maxWordsPerTransition = MAX_WORDS_PER_TRANSITION_BIAS + floor(markChainTransitionRepository.getRecommendedMaxWordsPerTransition(agentId)).toInt()
-        val transitions = Tokenizer.generateTransitions(data, MIN_WORDS_PER_TRANSITION, maxWordsPerTransition)
+        val maxWordsPerTransition = floor(markChainTransitionRepository.getRecommendedMaxWordsPerTransition(agentId)).toInt()
+        val transitions = Tokenizer.generateTransitions(data, 1, maxWordsPerTransition)
 
         val status = transactionManager.getTransaction(null)
         try {

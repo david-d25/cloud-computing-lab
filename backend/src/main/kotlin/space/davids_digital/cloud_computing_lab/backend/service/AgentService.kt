@@ -12,7 +12,7 @@ import space.davids_digital.cloud_computing_lab.backend.orm.entity.enum.AgentSta
 import space.davids_digital.cloud_computing_lab.backend.orm.entity.mapping.toModel
 import space.davids_digital.cloud_computing_lab.backend.orm.repository.AgentRepository
 import space.davids_digital.cloud_computing_lab.backend.orm.repository.MarkChainTransitionRepository
-import space.davids_digital.cloud_computing_lab.backend.util.GlobalConstraints.AGENT_SCHEDULED_EXECUTION_CHECK_DELAY_MS
+import space.davids_digital.cloud_computing_lab.backend.util.GlobalConstants.AGENT_SCHEDULED_EXECUTION_CHECK_DELAY_MS
 import java.time.Instant
 import javax.annotation.PostConstruct
 import javax.transaction.Transactional
