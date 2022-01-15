@@ -1,5 +1,6 @@
 package space.davids_digital.cloud_computing_lab.backend.service
 
+import org.hibernate.SessionFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
@@ -13,6 +14,7 @@ import kotlin.math.floor
 class LocalModelControlService(
     private val markChainTransitionRepository: MarkChainTransitionRepository,
     private val transactionManager: PlatformTransactionManager,
+    sessionFactory: SessionFactory,
     private val agentRepository: AgentRepository
 ): ModelControlService {
 
@@ -25,13 +27,9 @@ class LocalModelControlService(
         val status = transactionManager.getTransaction(null)
         try {
             transitions.stream()
-                .filter {
-                    (it.beginning == null || it.beginning!!.length < 255) && (it.continuation == null || it.continuation!!.length < 255) }
+                .filter { it.beginning.length < 255 && it.continuation.length < 255 }
                 .forEach {
-                    if (markChainTransitionRepository.existsByAgentIdAndBeginningAndContinuation(agentId, it.beginning, it.continuation))
-                        markChainTransitionRepository.updateExistingTransition(agentId, it.beginning, it.continuation, it.count.toLong())
-                    else
-                        markChainTransitionRepository.putNewTransition(agentId, it.beginning, it.continuation, it.count.toLong())
+                    markChainTransitionRepository.applyNewTransition(agentId, it.beginning, it.continuation, it.count.toLong())
                 }
 
             agentRepository.findById(agentId).ifPresent {

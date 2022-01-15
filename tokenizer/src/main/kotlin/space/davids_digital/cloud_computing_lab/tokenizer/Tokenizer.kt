@@ -6,18 +6,18 @@ import java.util.regex.Pattern
 
 object Tokenizer {
     data class Transition (
-        val beginning: String?,
-        val continuation: String?,
+        val beginning: String,
+        val continuation: String,
         var count: Int
     )
 
-    fun String?.isTerminator() = this?.matches(Regex("[.?!]+")) ?: false
-    fun String?.isWord() = this != null && this.matches(Regex("[()\\p{L}+*<>{}\\[\\]!@#\$%^&\"'`~-]+|\\d+"))
+    fun String.isTerminator() = this.matches(Regex("[.?!]*"))
+    fun String.isWord() = this.matches(Regex("[()\\p{L}+*<>{}\\[\\]!@#\$%^&\"'`~-]+|\\d+"))
 
     fun generateTransitions(text: String, minWordsPerTransition: Int, maxWordsPerTransition: Int): Set<Transition> {
         val tokens = tokenize(text)
-        val result = mutableMapOf<Pair<String?, String?>, Transition>()
-        fun MutableMap<Pair<String?, String?>, Transition>.putTransition(beginning: String?, continuation: String?) {
+        val result = mutableMapOf<Pair<String, String>, Transition>()
+        fun MutableMap<Pair<String, String>, Transition>.putTransition(beginning: String, continuation: String) {
             val key = Pair(beginning, continuation)
             if (!containsKey(key))
                 this[key] = Transition(beginning, continuation, 1)
@@ -25,13 +25,13 @@ object Tokenizer {
                 this[key]!!.count++
         }
 
-        fun getToken(i: Int) = if (i >= 0 && i < tokens.size) tokens[i] else null
+        fun getToken(i: Int) = if (i >= 0 && i < tokens.size) tokens[i] else ""
         fun wordsAvailableInSentence(start: Int, max: Int): Int {
             var i = start
             var counter = 0
             while (counter < max) {
                 val token = getToken(i)
-                if (token == null || token.isTerminator())
+                if (token == "" || token.isTerminator())
                     break
                 if (token.isWord())
                     counter++
@@ -53,7 +53,7 @@ object Tokenizer {
                 buffer.append(token)
                 i++
             }
-            while(getToken(i) != null && !getToken(i).isWord()) {
+            while(getToken(i) != "" && !getToken(i).isWord()) {
                 buffer.append(getToken(i))
                 i++
             }
@@ -62,14 +62,14 @@ object Tokenizer {
 
         var currentTokenIndex = -1
         while (currentTokenIndex < tokens.size) {
-            var beginning = getToken(currentTokenIndex)?.lowercase(Locale.getDefault())
+            var beginning = getToken(currentTokenIndex).lowercase(Locale.getDefault())
             if (beginning.isTerminator()) {
                 currentTokenIndex++
                 continue
             }
 
-            if (beginning != null) {
-                while (getToken(currentTokenIndex + 1) != null && !getToken(currentTokenIndex + 1).isWord()) {
+            if (beginning != "") {
+                while (getToken(currentTokenIndex + 1) != "" && !getToken(currentTokenIndex + 1).isWord()) {
                     currentTokenIndex++
                     beginning += getToken(currentTokenIndex)
                 }
@@ -80,12 +80,12 @@ object Tokenizer {
                 if (wordsAvailable >= wordsToUse) {
                     result.putTransition(beginning, grabNextNWords(currentTokenIndex + 1, wordsToUse))
                 } else if (wordsToUse == 1 && wordsAvailable == 0)
-                    result.putTransition(beginning, null)
+                    result.putTransition(beginning, "")
             }
 
             currentTokenIndex++
 
-            while (getToken(currentTokenIndex) != null && !getToken(currentTokenIndex).isWord())
+            while (getToken(currentTokenIndex) != "" && !getToken(currentTokenIndex).isWord())
                 currentTokenIndex++
         }
         return result.values.toSet()

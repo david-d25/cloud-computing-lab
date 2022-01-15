@@ -7,15 +7,16 @@ import space.davids_digital.cloud_computing_lab.backend.orm.repository.MarkChain
 import space.davids_digital.cloud_computing_lab.tokenizer.Tokenizer.isTerminator
 import java.util.*
 
-private const val MIN_WORDS = 2
-private const val SOFT_MAX_WORDS = 24
-private const val HARD_MAX_WORDS = 48
-
 @Service
 class TextGeneratorService(
     private val markChainTransitionRepository: MarkChainTransitionRepository,
     private val agentRepository: AgentRepository
 ) {
+    companion object {
+        private const val MIN_WORDS = 2
+        private const val SOFT_MAX_WORDS = 24
+        private const val HARD_MAX_WORDS = 48
+    }
 
     fun generate(text: String, styles: List<Int>): String {
         val result = StringBuilder()
@@ -31,7 +32,7 @@ class TextGeneratorService(
 
         while (true) {
             val fullText = text + result.toString()
-            val lastWord = pickLastWord(fullText)?.lowercase(Locale.getDefault())
+            val lastWord = pickLastWord(fullText).lowercase(Locale.getDefault())
 
             var currentTransitions = markChainTransitionRepository.findAllByAgentIdsAndBeginning(effectiveStyles, lastWord)
             if (currentTransitions.isEmpty()) {
@@ -45,9 +46,9 @@ class TextGeneratorService(
             }
 
             if (wordsGenerated < MIN_WORDS)
-                currentTransitions = currentTransitions.filter { it.continuation != null }.toMutableList()
+                currentTransitions = currentTransitions.filter { it.continuation != "" }.toMutableList()
 
-            val endingTransitions = currentTransitions.filter { it.continuation == null }.toMutableList()
+            val endingTransitions = currentTransitions.filter { it.continuation == "" }.toMutableList()
             if (wordsGenerated > SOFT_MAX_WORDS && endingTransitions.isNotEmpty())
                 currentTransitions = endingTransitions
 
@@ -61,7 +62,7 @@ class TextGeneratorService(
 
                 if (rVal <= 0.0) {
                     val continuation = currentTransitions[i].continuation
-                    if (continuation == null) {
+                    if (continuation == "") {
                         if (!result.endsWith("."))
                             result.append(".")
                         newSentenceWord = true
@@ -97,11 +98,11 @@ class TextGeneratorService(
         return text.substring(0, 1).uppercase(Locale.getDefault()) + text.substring(1)
     }
 
-    private fun pickLastWord(text: String): String? {
+    private fun pickLastWord(text: String): String {
         if (text.trim().indexOf(" ") != -1)
             return text.trim().substringAfterLast(" ")
         if (text.isNotBlank())
             return text
-        return null
+        return ""
     }
 }
