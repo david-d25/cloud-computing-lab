@@ -13,6 +13,11 @@
   import AdminPanel from "#/pages/AdminPanel";
   import DialogPopup from "#/components/dialogs/DialogPopup";
   import SettingsDialog from "#/components/dialogs/SettingsDialog";
+  import Axios from 'axios';
+
+  window.APP_BASE = window.location.pathname;
+
+  Axios.defaults.baseURL = APP_BASE;
 
   Vue.use(VueRouter);
   Vue.use(Vuex);
@@ -24,6 +29,7 @@
 
   let router = new VueRouter({
     mode: 'history',
+    base: APP_BASE,
     routes
   });
 

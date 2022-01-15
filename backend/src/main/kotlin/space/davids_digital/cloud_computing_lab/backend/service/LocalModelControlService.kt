@@ -14,7 +14,6 @@ import kotlin.math.floor
 class LocalModelControlService(
     private val markChainTransitionRepository: MarkChainTransitionRepository,
     private val transactionManager: PlatformTransactionManager,
-    sessionFactory: SessionFactory,
     private val agentRepository: AgentRepository
 ): ModelControlService {
 

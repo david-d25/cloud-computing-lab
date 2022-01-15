@@ -19,7 +19,7 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>3.3.2</version>
                 <configuration>
-                    <warName>ROOT</warName>
+                    <warName>mark-chains-fun</warName>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                     <webResources>
                         <resource>
