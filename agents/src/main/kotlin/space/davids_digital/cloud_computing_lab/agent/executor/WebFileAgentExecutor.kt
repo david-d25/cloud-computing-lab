@@ -7,9 +7,11 @@ import space.davids_digital.cloud_computing_lab.agent.context.AgentContext
 import space.davids_digital.cloud_computing_lab.agent.exception.AgentExecutionException
 import java.io.File
 import java.net.URL
+import java.nio.charset.Charset
 
 @AgentExecutor("Веб-файл")
 @AgentExecutorParameter("URL", "url", AgentExecutorParameterType.STRING,true)
+@AgentExecutorParameter("Кодировка", "encoding", AgentExecutorParameterType.STRING)
 class WebFileAgentExecutor(context: AgentContext): AbstractAgentExecutor(context) {
     companion object {
         private const val MAX_CHUNK_SIZE = 16384
@@ -18,7 +20,13 @@ class WebFileAgentExecutor(context: AgentContext): AbstractAgentExecutor(context
     override fun execute() {
         val url = URL(context.getParameter("url") ?: throw AgentExecutionException("Не указан URL"))
 
-        val data = removeGarbage(url.readText())
+        val charsetString = context.getParameter("encoding") ?: "UTF-8"
+        val charset = try {
+            Charset.forName(charsetString)
+        } catch (e: Exception) {
+            throw AgentExecutionException("Не получилось найти кодировку с названием '$charsetString'")
+        }
+        val data = removeGarbage(url.readText(charset))
 
         context.clearData()
 

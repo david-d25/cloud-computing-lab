@@ -5,6 +5,7 @@ import space.davids_digital.cloud_computing_lab.backend.orm.entity.enum.AgentSta
 import space.davids_digital.cloud_computing_lab.backend.orm.repository.AgentRepository
 import space.davids_digital.cloud_computing_lab.backend.orm.repository.MarkChainTransitionRepository
 import space.davids_digital.cloud_computing_lab.tokenizer.Tokenizer.isTerminator
+import space.davids_digital.cloud_computing_lab.tokenizer.Tokenizer.isWord
 import java.util.*
 
 @Service
@@ -32,7 +33,10 @@ class TextGeneratorService(
 
         while (true) {
             val fullText = text + result.toString()
-            val lastWord = pickLastWord(fullText).lowercase(Locale.getDefault())
+            var lastWord = pickLastWord(fullText).lowercase(Locale.getDefault())
+
+            if (!lastWord.isWord())
+                lastWord = ""
 
             var currentTransitions = markChainTransitionRepository.findAllByAgentIdsAndBeginning(effectiveStyles, lastWord)
             if (currentTransitions.isEmpty()) {

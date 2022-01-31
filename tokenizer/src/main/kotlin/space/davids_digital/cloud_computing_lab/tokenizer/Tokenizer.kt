@@ -63,7 +63,7 @@ object Tokenizer {
         var currentTokenIndex = -1
         while (currentTokenIndex < tokens.size) {
             var beginning = getToken(currentTokenIndex).lowercase(Locale.getDefault())
-            if (beginning.isTerminator()) {
+            if (beginning != "" && beginning.isTerminator()) {
                 currentTokenIndex++
                 continue
             }
